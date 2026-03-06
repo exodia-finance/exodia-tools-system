@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Mini QuickBooks</title>
+  <title>Exodia Ledger Test</title>
   <link rel="stylesheet" href="./css/styles.css" />
 
   <style>
@@ -160,6 +160,166 @@
   font-size:12px;
   margin-top:8px;
 }
+
+/* =========================
+   JOURNAL ENTRY PROFESSIONAL STYLE
+========================= */
+.je-card{
+  max-width: 980px;
+  background: #fff;
+  border: 1px solid #d9d9d9;
+  border-radius: 14px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+  padding: 18px;
+  margin-top: 12px;
+}
+
+.je-section-title{
+  font-size: 14px;
+  font-weight: 700;
+  margin: 4px 0 12px;
+  color: #333;
+}
+
+.je-grid{
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 12px;
+  max-width: 940px;
+}
+
+.je-grid label{
+  display: grid;
+  gap: 6px;
+  font-size: 13px;
+  color: #333;
+}
+
+.je-grid input,
+.je-grid textarea,
+.je-grid select{
+  border: 1px solid #cfcfcf;
+  border-radius: 8px;
+  background: #fff;
+  padding: 12px 14px;
+  font-size: 16px;   /* bigger text */
+}
+
+.je-grid input:focus,
+.je-grid textarea:focus,
+.je-grid select:focus{
+  outline: none;
+  border-color: #666;
+  box-shadow: 0 0 0 3px rgba(0,0,0,0.06);
+}
+
+.je-lines-wrap{
+  margin-top: 16px;
+}
+
+.je-lines-table{
+  width: 100%;
+  max-width: 940px;
+  border-collapse: collapse;
+  table-layout: fixed;
+  background: #fff;
+  border: 1px solid #d9d9d9;
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.je-lines-table th{
+  background: #f5f6f8;
+  font-weight: 700;
+  font-size: 15px;
+  color: #333;
+  border: 1px solid #d9d9d9;
+  padding: 12px;
+}
+
+.je-lines-table td{
+  border: 1px solid #e3e3e3;
+  padding: 8px;
+  vertical-align: middle;
+}
+
+.je-lines-table input,
+.je-lines-table select{
+  width: 100%;
+  padding: 11px 12px;
+  border: 1px solid #cfcfcf;
+  border-radius: 8px;
+  box-sizing: border-box;
+  font-size: 16px;
+}
+
+.je-lines-table input:focus,
+.je-lines-table select:focus{
+  outline: none;
+  border-color: #666;
+  box-shadow: 0 0 0 3px rgba(0,0,0,0.05);
+}
+
+.je-actions{
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 14px;
+}
+
+.btn-soft{
+  padding: 10px 14px;
+  border: 1px solid #c7c7c7;
+  background: #fff;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.btn-soft:hover{
+  background: #f7f7f7;
+}
+
+.btn-dark{
+  padding: 10px 16px;
+  border: 1px solid #333;
+  background: #333;
+  color: #fff;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.btn-dark:hover{
+  background: #222;
+}
+
+.je-status{
+  margin-top: 10px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.coa-summary-card{
+  background:#fff;
+  border:1px solid #d9d9d9;
+  border-radius:12px;
+  padding:14px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+}
+
+.coa-summary-title{
+  font-size:14px;
+  color:#666;
+  margin-bottom:8px;
+  font-weight:600;
+}
+
+.coa-summary-value{
+  font-size:22px;
+  font-weight:700;
+  color:#222;
+}
     
   </style>
 </head>
@@ -190,7 +350,7 @@
     <button onclick="show('coa')">Chart of Accounts</button>
     <button onclick="show('journal')">Journal Entry</button>
     <button onclick="show('ledger')">General Ledger</button>
-    <button onclick="show('trial')">Trial Balance</button>
+    <button onclick="show('trial')">Worksheet</button>
   </header>
 
   <!-- ✅ COA OPTIONS BAR (only show on COA tab via JS) -->
@@ -199,29 +359,29 @@
   <button onclick="openAddCoaModal()">+ Add Account</button>
 </div>
 
-  <!-- ✅ Year/Month stays always -->
-  <div style="margin:10px 0;">
-    Year:
-    <select id="filter-year" onchange="applyDateFilter()"></select>
+  <!-- ✅ DATE RANGE FILTER -->
+<div id="date-range-bar" style="margin:10px 0; display:flex; gap:12px; align-items:center; flex-wrap:wrap;">
+  <b>Date Range:</b>
 
-    Month:
-    <select id="filter-month" onchange="applyDateFilter()">
-      <option value="">All</option>
-      <option value="1">Jan</option>
-      <option value="2">Feb</option>
-      <option value="3">Mar</option>
-      <option value="4">Apr</option>
-      <option value="5">May</option>
-      <option value="6">Jun</option>
-      <option value="7">Jul</option>
-      <option value="8">Aug</option>
-      <option value="9">Sep</option>
-      <option value="10">Oct</option>
-      <option value="11">Nov</option>
-      <option value="12">Dec</option>
-    </select>
-  </div>
+  <label>
+    From:
+    <input type="date" id="filter-from">
+  </label>
 
+  <label>
+    To:
+   <input type="date" id="filter-to">
+  </label>
+
+  <button onclick="applyDateRangeFilter()" class="btn primary">
+Apply
+</button>
+
+  <button onclick="clearDateRange()" class="btn">
+    Clear
+  </button>
+</div>
+  
   <!-- ✅ JOURNAL OPTIONS BAR (only show on Journal tab via JS) -->
 <div id="journal-toolbar" style="display:none; margin:10px 0; padding:8px; border:1px solid #ccc;">
   <b>Journal Options:</b>
@@ -232,6 +392,33 @@
   <!-- ========================= COA ========================= -->
   <section id="coa">
     <h2>Chart of Accounts</h2>
+
+    <div id="coa-summary" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap:12px; max-width:1000px; margin:12px 0 16px;">
+  <div class="coa-summary-card">
+    <div class="coa-summary-title">Assets</div>
+    <div class="coa-summary-value" id="sum-asset">0.00</div>
+  </div>
+
+  <div class="coa-summary-card">
+    <div class="coa-summary-title">Liabilities</div>
+    <div class="coa-summary-value" id="sum-liability">0.00</div>
+  </div>
+
+  <div class="coa-summary-card">
+    <div class="coa-summary-title">Equity</div>
+    <div class="coa-summary-value" id="sum-equity">0.00</div>
+  </div>
+
+  <div class="coa-summary-card">
+    <div class="coa-summary-title">Revenue</div>
+    <div class="coa-summary-value" id="sum-revenue">0.00</div>
+  </div>
+
+  <div class="coa-summary-card">
+    <div class="coa-summary-title">Expenses</div>
+    <div class="coa-summary-value" id="sum-expense">0.00</div>
+  </div>
+</div>
 
     <div id="filters" style="margin:10px 0;">
       <button onclick="filterCOA('All')">All</button>
@@ -259,14 +446,17 @@
 
   <!-- ========================= JOURNAL ========================= -->
   <section id="journal" style="display:none;">
-    <h2>Journal Entry</h2>
+  <h2>Journal Entry</h2>
 
-    <div style="display:grid; grid-template-columns: 220px 1fr; gap:8px; max-width:900px;">
+  <div class="je-card">
+    <div class="je-section-title">Entry Information</div>
+
+    <div class="je-grid">
       <label>Date *
         <input type="date" id="je-date">
       </label>
 
-      <label style="grid-column:1 / span 2;">
+      <label>
         Reference No. *
         <input type="text" id="je-refno">
       </label>
@@ -277,49 +467,66 @@
       </label>
 
       <label style="grid-column:1 / span 2;">
-        Department / Cost Center:
+        Department / Cost Center
         <input type="text" id="je-dept">
       </label>
 
       <label style="grid-column:1 / span 2;">
-        Payment Method:
+        Payment Method
         <input type="text" id="je-paymethod">
       </label>
 
       <label style="grid-column:1 / span 2;">
-        Client / Vendor:
+        Client / Vendor
         <input type="text" id="je-client">
       </label>
 
       <label style="grid-column:1 / span 2;">
-        Remarks:
+        Remarks
         <input type="text" id="je-remarks">
       </label>
     </div>
 
-    <br>
+    <div class="je-lines-wrap">
+      <div class="je-section-title">Journal Lines</div>
 
-    <table border="1" cellpadding="6">
-      <thead>
-        <tr>
-          <th>Account</th>
-          <th>Debit</th>
-          <th>Credit</th>
-          <th></th>
-        </tr>
-      </thead>
-      <tbody id="je-lines"></tbody>
-    </table>
+      <table class="je-lines-table">
+        <thead>
+          <tr>
+            <th style="width:55%;">Account</th>
+            <th style="width:18%;">Debit</th>
+            <th style="width:18%;">Credit</th>
+            <th style="width:10%;">Action</th>
+          </tr>
+        </thead>
+        <tbody id="je-lines"></tbody>
+      </table>
+    </div>
 
-    <button onclick="addLine()">Add Line</button>
-    <button onclick="saveJournal()">Save Journal Entry</button>
+    <div class="je-actions">
+      <button class="btn-soft" onclick="addLine()">+ Add Line</button>
+      <button class="btn-dark" onclick="saveJournal()">Save Journal Entry</button>
+    </div>
 
-    <p id="je-status"></p>
-  </section>
+    <p id="je-status" class="je-status"></p>
+  </div>
+</section>
 
   <!-- ========================= LEDGER ========================= -->
+  
   <section id="ledger" style="display:none;">
     <h2>General Ledger</h2>
+
+    <div style="margin: 8px 0;">
+  <label for="ledger-search"><b>Search account:</b></label>
+  <input
+    id="ledger-search"
+    type="text"
+    placeholder="Type code or name (e.g. 1001, cash, bank)..."
+    style="width: 320px; padding: 6px;"
+    oninput="filterLedgerAccounts()"
+  />
+</div>
 
     <select id="ledger-account" onchange="renderLedger()"></select>
 
@@ -333,10 +540,10 @@
 <th>Pay Method</th>
 <th>Client/Vendor</th>
 <th>Remarks</th>
+<th>Actions</th>
 <th>Debit</th>
 <th>Credit</th>
 <th>Running Balance</th>
-<th>Actions</th>
         </tr>
       </thead>
       <tbody id="ledger-body"></tbody>
@@ -345,8 +552,20 @@
 
   <!-- ========================= TRIAL ========================= -->
   <section id="trial" style="display:none;">
-    <h2>Trial Balance</h2>
+  <h2>Worksheet</h2>
 
+  <div style="margin:10px 0; padding:8px; border:1px solid #ccc;">
+    <b>Worksheet Options:</b>
+    <button onclick="showWorksheet('trial')">Trial Balance</button>
+    <button onclick="showWorksheet('pl')">Statement of Profit and Loss</button>
+    <button onclick="showWorksheet('sfp')">Statement of Financial Position</button>
+  </div>
+
+  <!-- Trial Balance -->
+  <div id="ws-trial">
+    <div style="margin:10px 0;">
+  <button class="btn primary" onclick="downloadTrialBalancePDF()">Download PDF</button>
+</div>
     <table border="1" cellpadding="6">
       <thead>
         <tr>
@@ -368,7 +587,30 @@
     </table>
 
     <p id="tb-status"></p>
-  </section>
+  </div>
+
+  <!-- Statement of Profit and Loss -->
+  <div id="ws-pl" style="display:none;">
+    <h3>Statement of Profit and Loss</h3>
+    <table border="1" cellpadding="6" style="max-width:700px; width:100%;">
+      <tbody id="pl-body"></tbody>
+      <tfoot>
+        <tr>
+          <td><b>Net Profit / Loss</b></td>
+          <td id="pl-net" style="text-align:right;"><b>0.00</b></td>
+        </tr>
+      </tfoot>
+    </table>
+  </div>
+
+  <!-- Statement of Financial Position -->
+  <div id="ws-sfp" style="display:none;">
+    <h3>Statement of Financial Position</h3>
+    <table border="1" cellpadding="6" style="max-width:700px; width:100%;">
+      <tbody id="sfp-body"></tbody>
+    </table>
+  </div>
+</section>
 
   <!-- ========================= HISTORY ========================= -->
   <section id="journal-history" style="display:none;">
@@ -385,12 +627,56 @@
           <th>Payment Method</th>
           <th>Client/Vendor</th>
           <th>Remarks</th>
+          <th>Details</th>
         </tr>
       </thead>
       <tbody id="history-body"></tbody>
     </table>
 
     <p id="history-status"></p>
+
+<!-- ========================= HISTORY VIEW MODAL ========================= -->
+<div id="history-modal" class="modal-backdrop" style="display:none;">
+  <div class="modal-card" style="width: 900px;">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title">Journal Entry Details</div>
+        <div class="modal-sub" id="hm-sub">View transaction details</div>
+      </div>
+      <button class="modal-x" onclick="closeHistoryModal()">✕</button>
+    </div>
+
+    <div class="modal-body">
+      <div style="display:grid; grid-template-columns: 220px 1fr; gap:10px;">
+        <div><b>Date:</b> <span id="hm-date"></span></div>
+        <div><b>Ref:</b> <span id="hm-ref"></span></div>
+        <div style="grid-column:1 / span 2;"><b>Description:</b> <span id="hm-desc"></span></div>
+        <div><b>Department:</b> <span id="hm-dept"></span></div>
+        <div><b>Payment:</b> <span id="hm-pay"></span></div>
+        <div><b>Client/Vendor:</b> <span id="hm-client"></span></div>
+        <div style="grid-column:1 / span 2;"><b>Remarks:</b> <span id="hm-remarks"></span></div>
+      </div>
+
+      <h3 style="margin-top:14px;">Lines</h3>
+      <table border="1" cellpadding="6" style="width:100%;">
+        <thead>
+          <tr>
+            <th>Account</th>
+            <th style="text-align:right;">Debit</th>
+            <th style="text-align:right;">Credit</th>
+          </tr>
+        </thead>
+        <tbody id="hm-lines"></tbody>
+      </table>
+
+      <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:12px;">
+        <button class="btn" onclick="closeHistoryModal()">Close</button>
+        <button class="btn primary" id="hm-edit-btn">Edit / Delete</button>
+      </div>
+    </div>
+  </div>
+</div>
+    
   </section>
 </div>
 
@@ -445,6 +731,8 @@
 
 <!-- ========================= SCRIPTS ========================= -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.2/dist/jspdf.plugin.autotable.min.js"></script>
 <script src="./app.js"></script>
 
 </body>

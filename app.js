@@ -1947,11 +1947,12 @@ window.saveAddCoaModal = async function () {
   const name = $("addcoa-name").value.trim();
   const type = $("addcoa-type").value;
   const normal = $("addcoa-normal").value;
-const exists = COA.some(a => String(a.code).trim() === code);
-if (exists) {
-  $("addcoa-msg").textContent = `Code ${code} already exists. Try ${getNextAccountCode()} instead.`;
-  return;
-}
+
+  const exists = COA.some(a => !a.is_deleted && String(a.code).trim() === code);
+  if (exists) {
+    $("addcoa-msg").textContent = `Code ${code} already exists. Please use another code.`;
+    return;
+  }
 
   if (!code || !name) {
     $("addcoa-msg").textContent = "Code and Name are required.";
@@ -1969,21 +1970,35 @@ if (exists) {
     });
 
     COA = await sbFetchCOA();
+    refreshCoaDatalist();
+    resolveLinesAccountIds();
+
+    const ledgerSel = $("ledger-account");
+    if (ledgerSel) ledgerSel.innerHTML = "";
+
+    currentCOAType = "All";
+
     renderCOA();
+    renderLedger();
+    renderTrialBalance();
+
+    $("addcoa-msg").textContent = "";
     closeAddCoaModal();
   } catch (e) {
-  console.error(e);
-  // supabase error code 23505 = duplicate
-  if (e?.code === "23505") {
-    $("addcoa-msg").textContent = `Code ${code} already exists. Please use another code.`;
-    return;
+    console.error(e);
+
+    if (e?.code === "23505") {
+      $("addcoa-msg").textContent = `Code ${code} already exists. Please use another code.`;
+      return;
+    }
+
+    $("addcoa-msg").textContent = "Failed to add account. Check your connection/policies.";
   }
-  $("addcoa-msg").textContent = "Failed to add account. Check your connection/policies.";
-}
 };
 
 function getNextAccountCode() {
   const codes = (COA || [])
+    .filter(a => !a.is_deleted)
     .map(a => Number(String(a.code || "").replace(/[^0-9]/g, "")))
     .filter(n => Number.isFinite(n));
 

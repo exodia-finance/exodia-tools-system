@@ -1012,7 +1012,7 @@ function renderCOA() {
   tbody.innerHTML = "";
   const balances = computeBalances();
 
-    const totalsByType = {
+   const totalsByType = {
     Asset: 0,
     Liability: 0,
     Equity: 0,
@@ -1022,8 +1022,10 @@ function renderCOA() {
 
   COA.forEach((a) => {
     const bal = balances[a.id] || 0;
-    if (totalsByType[a.type] !== undefined) {
-      totalsByType[a.type] += bal;
+    const typeKey = normalizeAccountType(a.type);
+
+    if (typeKey && totalsByType[typeKey] !== undefined) {
+      totalsByType[typeKey] += bal;
     }
   });
 
@@ -1032,7 +1034,6 @@ function renderCOA() {
   if ($("sum-equity")) $("sum-equity").textContent = money(totalsByType.Equity || 0);
   if ($("sum-revenue")) $("sum-revenue").textContent = money(totalsByType.Revenue || 0);
   if ($("sum-expense")) $("sum-expense").textContent = money(totalsByType.Expense || 0);
-
   const typeOrder = { Asset: 1, Liability: 2, Equity: 3, Revenue: 4, Expense: 5 };
 
   const list = COA
@@ -1216,6 +1217,18 @@ function computeBalances() {
     });
 
   return balances;
+}
+
+function normalizeAccountType(type) {
+  const t = String(type || "").trim().toLowerCase();
+
+  if (t === "asset" || t === "assets") return "Asset";
+  if (t === "liability" || t === "liabilities") return "Liability";
+  if (t === "equity") return "Equity";
+  if (t === "revenue" || t === "revenues" || t === "income") return "Revenue";
+  if (t === "expense" || t === "expenses") return "Expense";
+
+  return "";
 }
 
 // ==============================

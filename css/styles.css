@@ -459,3 +459,11 @@ COA SUMMARY GRID
   max-width:1000px;
   margin:12px 0 16px;
 }
+
+/* =========================
+COA FILTERS
+========================= */
+
+#filters{
+  margin:10px 0;
+}

@@ -468,4 +468,13 @@ COA FILTERS
   margin:10px 0;
 }
 
-
+body{
+  min-height: 100vh;
+  margin: 0;
+  background:
+    radial-gradient(circle at top left, rgba(255, 102, 0, 0.14), transparent 28%),
+    radial-gradient(circle at bottom right, rgba(255, 140, 0, 0.10), transparent 30%),
+    linear-gradient(135deg, #111114 0%, #19161b 35%, #121214 70%, #0d0d10 100%);
+  background-attachment: fixed;
+  color: #111;
+}

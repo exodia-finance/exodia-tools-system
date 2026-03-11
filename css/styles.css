@@ -419,4 +419,22 @@
   font-weight:700;
   color:#222;
 }
-    
+
+/* =========================
+AUTH BOX
+========================= */
+
+#auth-box{
+  border:1px solid #ccc;
+  padding:10px;
+  margin:10px;
+}
+
+#auth-email,
+#auth-pass{
+  width:220px;
+}
+
+#auth-msg{
+  margin-left:10px;
+}

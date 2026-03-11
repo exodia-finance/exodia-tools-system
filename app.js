@@ -689,6 +689,22 @@ window.showJournal = function (which) {
   if (which === "history") renderHistory();
 };
 
+window.showWorksheet = function (view) {
+  localStorage.setItem(WORKSHEET_VIEW_KEY, view);
+
+  const trial = $("ws-trial");
+  const pl = $("ws-pl");
+  const sfp = $("ws-sfp");
+
+  if (trial) trial.style.display = (view === "trial") ? "block" : "none";
+  if (pl) pl.style.display = (view === "pl") ? "block" : "none";
+  if (sfp) sfp.style.display = (view === "sfp") ? "block" : "none";
+
+  if (view === "trial") renderTrialBalance();
+  if (view === "pl") renderProfitAndLoss();
+  if (view === "sfp") renderStatementOfFinancialPosition();
+};
+
 // ==============================
 // Tabs
 // ==============================

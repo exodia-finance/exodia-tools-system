@@ -1231,6 +1231,183 @@ function normalizeAccountType(type) {
   return "";
 }
 
+function isDepartmentExpenseName(name) {
+  const n = String(name || "").trim();
+
+  if (
+    n === "Facilities Department Expense - General" ||
+    n === "Finance Department Expense - General" ||
+    n === "Human Resource Department Expense - General" ||
+    n === "Information Technology Department Expense - General" ||
+    n === "Marketing Department Expense - General" ||
+    n === "Operation Department Expense - General" ||
+    n === "Sales Department Expense - General" ||
+    n === "Chiefs Expense - General"
+  ) {
+    return true;
+  }
+
+  const prefixes = [
+    "FE - ",
+    "Fine - ",
+    "HRE - ",
+    "ITE - ",
+    "ME - ",
+    "OpEx - ",
+    "SE - ",
+    "ChiE - "
+  ];
+
+  if (prefixes.some((p) => n.startsWith(p))) return true;
+  if (n === "ChiE_Office_Equipment_Expense") return true;
+
+  return false;
+}
+
+function getDepartmentExpenseGroupName(name) {
+  const n = String(name || "").trim();
+
+  if (
+    n === "Facilities Department Expense - General" ||
+    n === "Finance Department Expense - General" ||
+    n === "Human Resource Department Expense - General" ||
+    n === "Information Technology Department Expense - General" ||
+    n === "Marketing Department Expense - General" ||
+    n === "Operation Department Expense - General" ||
+    n === "Sales Department Expense - General" ||
+    n === "Chiefs Expense - General"
+  ) {
+    return "General";
+  }
+
+  const prefixMap = [
+    "FE - ",
+    "Fine - ",
+    "HRE - ",
+    "ITE - ",
+    "ME - ",
+    "OpEx - ",
+    "SE - ",
+    "ChiE - "
+  ];
+
+  for (const prefix of prefixMap) {
+    if (n.startsWith(prefix)) {
+      let base = n.slice(prefix.length).trim();
+
+      if (base === "Internet & IT Expense") base = "Internet & Subscription Expense";
+      if (base === "Internet & Subcription Expense") base = "Internet & Subscription Expense";
+
+      return base;
+    }
+  }
+
+  if (n === "ChiE_Office_Equipment_Expense") return "Office Equipment Expense";
+
+  return n;
+}
+
+function getDepartmentLabelFromAccountName(name) {
+  const n = String(name || "").trim();
+
+  if (n === "Facilities Department Expense - General") return "Facilities";
+  if (n === "Finance Department Expense - General") return "Finance";
+  if (n === "Human Resource Department Expense - General") return "Human Resource";
+  if (n === "Information Technology Department Expense - General") return "Information Technology";
+  if (n === "Marketing Department Expense - General") return "Marketing";
+  if (n === "Operation Department Expense - General") return "Operation";
+  if (n === "Sales Department Expense - General") return "Sales";
+  if (n === "Chiefs Expense - General") return "Chiefs";
+
+  if (n.startsWith("FE - ")) return "Facilities";
+  if (n.startsWith("Fine - ")) return "Finance";
+  if (n.startsWith("HRE - ")) return "Human Resource";
+  if (n.startsWith("ITE - ")) return "Information Technology";
+  if (n.startsWith("ME - ")) return "Marketing";
+  if (n.startsWith("OpEx - ")) return "Operation";
+  if (n.startsWith("SE - ")) return "Sales";
+  if (n.startsWith("ChiE - ")) return "Chiefs";
+  if (n === "ChiE_Office_Equipment_Expense") return "Chiefs";
+
+  return "Unknown Department";
+}
+
+function getDepartmentExpenseGroupOrder(name) {
+  const order = [
+    "General",
+    "Advertising & Marketing",
+    "Meals & Entertainment",
+    "Bank Fees & Charges",
+    "Travel Expense",
+    "Lodging Expense",
+    "Mileage Expense",
+    "Telephone Expense",
+    "Internet & Subscription Expense",
+    "Electricity & Utilities",
+    "Rent Expense",
+    "Janitorial & Cleaning",
+    "Security Services",
+    "Postage & Shipping",
+    "Repairs & Maintenance",
+    "Office Supplies Expense",
+    "Office Equipment Expense",
+    "Depreciation Expense - Office Equipment",
+    "Depreciation Expense - Store Equipment",
+    "Salaries & Wages",
+    "Employee Benefits",
+    "Employee Allowances",
+    "Professional Fees",
+    "Service Fees",
+    "Government Fees & Permits",
+    "Taxes & Licenses",
+    "Parking Fees Expense"
+  ];
+
+  const idx = order.indexOf(name);
+  return idx === -1 ? 999 : idx;
+}
+
+function getCompanyExpenseOrder(name) {
+  const order = [
+    "Company Expenses - General",
+    "Advertising & Marketing",
+    "Meals & Entertainment",
+    "Bank Fees & Charges",
+    "Travel Expense",
+    "Lodging Expense",
+    "Mileage Expense",
+    "Telephone Expense",
+    "Internet & Subcription Expense",
+    "Internet & Subscription Expense",
+    "Electricity & Utilities",
+    "Rent Expense",
+    "Janitorial & Cleaning",
+    "Security Services",
+    "Office Supplies Expense",
+    "Postage & Shipping",
+    "Repairs & Maintenance",
+    "Depreciation Expense - Office Equipment",
+    "Depreciation Expense - Store Equipment",
+    "Salaries & Wages Expense",
+    "Freelance/Service Expense",
+    "Employee Benefits",
+    "Employee Allowances",
+    "Professional Fees",
+    "Service Fees",
+    "Government Fees & Permits",
+    "Taxes & Licenses",
+    "Parking Fees Expense",
+    "Credit Card Charges",
+    "Bad Debt Expense",
+    "Purchase Discounts",
+    "Automobile Expense",
+    "Training & Development"
+  ];
+
+  const idx = order.indexOf(String(name || "").trim());
+  return idx === -1 ? 999 : idx;
+}
+
 // ==============================
 // Trial Balance
 // ==============================
@@ -1309,38 +1486,177 @@ function renderProfitAndLoss() {
 
   tbody.innerHTML = "";
 
-  const balances = computeBalances();
+  const filteredLines = lines
+    .filter((l) => !l.is_deleted)
+    .filter((l) => {
+      const d = String(l.entry_date || "");
+      if (filterFrom && d < filterFrom) return false;
+      if (filterTo && d > filterTo) return false;
+      return true;
+    });
+
+  // -----------------------------
+  // REVENUE
+  // -----------------------------
+  const revenueAccounts = COA
+    .filter((a) => normalizeAccountType(a.type) === "Revenue")
+    .sort((a, b) => {
+      const ca = codeNum(a.code);
+      const cb = codeNum(b.code);
+      if (ca !== cb) return ca - cb;
+      return String(a.name || "").localeCompare(String(b.name || ""));
+    });
 
   let totalRevenue = 0;
-  let totalExpense = 0;
 
-  COA.forEach((a) => {
-    const bal = balances[a.id] || 0;
-    const type = String(a.type || "").trim();
+  const revHead = document.createElement("tr");
+  revHead.innerHTML = `<td colspan="2"><b>Revenue</b></td>`;
+  tbody.appendChild(revHead);
 
-    if (type === "Revenue") totalRevenue += bal;
-    if (type === "Expense" || type === "Expenses") totalExpense += bal;
+  revenueAccounts.forEach((acct) => {
+    const acctId = acct.id;
+    const total = filteredLines
+      .filter((l) => (l.resolvedAccountId || l.accountId) === acctId)
+      .reduce((sum, l) => sum + (num(l.credit) - num(l.debit)), 0);
+
+    totalRevenue += total;
+
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${esc(acct.name)}</td>
+      <td style="text-align:right;">${money(Math.abs(total) < 0.00001 ? 0 : total)}</td>
+    `;
+    tbody.appendChild(tr);
   });
 
-  const net = totalRevenue - totalExpense;
-
-  if (Math.abs(totalRevenue) < 0.00001) totalRevenue = 0;
-  if (Math.abs(totalExpense) < 0.00001) totalExpense = 0;
-  let finalNet = net;
-  if (Math.abs(finalNet) < 0.00001) finalNet = 0;
-
-  tbody.innerHTML = `
-    <tr>
-      <td><b>Total Revenue</b></td>
-      <td style="text-align:right;">${money(totalRevenue)}</td>
-    </tr>
-    <tr>
-      <td><b>Total Expenses</b></td>
-      <td style="text-align:right;">${money(totalExpense)}</td>
-    </tr>
+  const revTotal = document.createElement("tr");
+  revTotal.innerHTML = `
+    <td><b>Total Revenue</b></td>
+    <td style="text-align:right;"><b>${money(Math.abs(totalRevenue) < 0.00001 ? 0 : totalRevenue)}</b></td>
   `;
+  tbody.appendChild(revTotal);
 
-  netEl.textContent = money(net);
+  // -----------------------------
+  // EXPENSES
+  // -----------------------------
+  const expenseAccounts = COA
+    .filter((a) => normalizeAccountType(a.type) === "Expense");
+
+  const departmentGroups = {};
+  const companyItems = [];
+
+  expenseAccounts.forEach((acct) => {
+    const rawName = String(acct.name || "").trim();
+    const acctId = acct.id;
+
+    const acctTotal = filteredLines
+      .filter((l) => (l.resolvedAccountId || l.accountId) === acctId)
+      .reduce((sum, l) => sum + (num(l.debit) - num(l.credit)), 0);
+
+    if (isDepartmentExpenseName(rawName)) {
+      const groupName = getDepartmentExpenseGroupName(rawName);
+
+      if (!departmentGroups[groupName]) {
+        departmentGroups[groupName] = {
+          total: 0,
+          items: []
+        };
+      }
+
+      departmentGroups[groupName].total += acctTotal;
+      departmentGroups[groupName].items.push({
+        name: rawName,
+        departmentLabel: getDepartmentLabelFromAccountName(rawName),
+        total: acctTotal
+      });
+    } else {
+      companyItems.push({
+        name: rawName,
+        total: acctTotal,
+        code: acct.code || ""
+      });
+    }
+  });
+
+  let totalExpense = 0;
+
+  const expHead = document.createElement("tr");
+  expHead.innerHTML = `<td colspan="2"><b>Expenses</b></td>`;
+  tbody.appendChild(expHead);
+
+  // -----------------------------
+  // DEPARTMENT EXPENSE GROUPS FIRST
+  // -----------------------------
+  const orderedDepartmentGroups = Object.keys(departmentGroups).sort((a, b) => {
+    return getDepartmentExpenseGroupOrder(a) - getDepartmentExpenseGroupOrder(b);
+  });
+
+  orderedDepartmentGroups.forEach((groupName, i) => {
+    const grp = departmentGroups[groupName];
+    totalExpense += grp.total;
+
+    const detailClass = `pl-dept-${i}`;
+
+    const parentRow = document.createElement("tr");
+    parentRow.innerHTML = `
+      <td>
+        <button type="button" class="btn-soft" onclick="togglePLDetail('${detailClass}', this)">▶</button>
+        <b>${esc(groupName)}</b>
+      </td>
+      <td style="text-align:right;"><b>${money(Math.abs(grp.total) < 0.00001 ? 0 : grp.total)}</b></td>
+    `;
+    tbody.appendChild(parentRow);
+
+    grp.items
+      .sort((a, b) => a.departmentLabel.localeCompare(b.departmentLabel))
+      .forEach((item) => {
+        const dtr = document.createElement("tr");
+        dtr.className = detailClass;
+        dtr.style.display = "none";
+        dtr.innerHTML = `
+          <td style="padding-left:40px;">${esc(item.departmentLabel)}</td>
+          <td style="text-align:right;">${money(Math.abs(item.total) < 0.00001 ? 0 : item.total)}</td>
+        `;
+        tbody.appendChild(dtr);
+      });
+  });
+
+  // -----------------------------
+  // COMPANY EXPENSES AFTER DEPARTMENT EXPENSES
+  // -----------------------------
+  if (companyItems.length > 0) {
+    const companyHead = document.createElement("tr");
+    companyHead.innerHTML = `<td colspan="2"><b>Company Expenses</b></td>`;
+    tbody.appendChild(companyHead);
+
+    companyItems
+      .sort((a, b) => {
+        const oa = getCompanyExpenseOrder(a.name);
+        const ob = getCompanyExpenseOrder(b.name);
+        if (oa !== ob) return oa - ob;
+        return a.name.localeCompare(b.name);
+      })
+      .forEach((item) => {
+        totalExpense += item.total;
+
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${esc(item.name)}</td>
+          <td style="text-align:right;">${money(Math.abs(item.total) < 0.00001 ? 0 : item.total)}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+  }
+
+  const expTotal = document.createElement("tr");
+  expTotal.innerHTML = `
+    <td><b>Total Expenses</b></td>
+    <td style="text-align:right;"><b>${money(Math.abs(totalExpense) < 0.00001 ? 0 : totalExpense)}</b></td>
+  `;
+  tbody.appendChild(expTotal);
+
+  const net = totalRevenue - totalExpense;
+  netEl.textContent = money(Math.abs(net) < 0.00001 ? 0 : net);
 }
 
 function renderStatementOfFinancialPosition() {
@@ -1781,6 +2097,23 @@ function esc(s) {
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#039;");
 }
+
+window.togglePLDetail = function (className, btn) {
+  const rows = document.querySelectorAll("." + className);
+  let isOpening = false;
+
+  rows.forEach((row) => {
+    if (row.style.display === "none") isOpening = true;
+  });
+
+  rows.forEach((row) => {
+    row.style.display = isOpening ? "table-row" : "none";
+  });
+
+  if (btn) {
+    btn.textContent = isOpening ? "▼" : "▶";
+  }
+};
 
 // ✅ Live red-border validation for required fields
 ["je-date", "je-refno", "je-description"].forEach((id) => {

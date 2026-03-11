@@ -648,3 +648,11 @@ CHART OF ACCOUNTS - BLACK ORANGE THEME
 .coa-menu .danger:hover{
   background:#ffe6d8;
 }
+
+#app{
+  background: #ffffff;
+  margin: 20px;
+  padding: 20px;
+  border-radius: 14px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+}

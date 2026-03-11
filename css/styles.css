@@ -1,4 +1,8 @@
-    /* Filters */
+body{
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* Filters */
     #filters select {
       width: auto;
       padding: 4px 6px;
@@ -559,11 +563,8 @@ CHART OF ACCOUNTS - BLACK ORANGE THEME
 
 /* Table body */
 #coa tbody td{
-  padding: 13px 12px;
-  font-size: 14px;
-  color: #222;
-  border-bottom: 1px solid #f3e2d5;
-  vertical-align: middle;
+  padding: 16px 12px;
+  font-size: 15px;
 }
 
 #coa tbody tr:nth-child(even){
@@ -655,4 +656,46 @@ CHART OF ACCOUNTS - BLACK ORANGE THEME
   padding: 20px;
   border-radius: 14px;
   box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+}
+
+#coa h2{
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 42px;
+  font-weight: 700;
+  margin: 6px 0 22px;
+  color: #181818;
+}
+
+.coa-summary-title{
+  font-size: 14px;
+  color: #9a5a2c;
+  margin-bottom: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.coa-summary-value{
+  font-size: 18px;
+  font-weight: 800;
+  color: #1c1c1c;
+}
+
+#coa thead th{
+  font-size: 15px;
+  font-weight: 800;
+  padding: 16px 12px;
+}
+
+#coa tbody td:first-child{
+  font-weight: 700;
+  color: #a14d12;
+  font-size: 16px;
+}
+
+#coa tbody td:nth-child(5){
+  font-weight: 800;
+  font-size: 16px;
+  color: #111;
+  text-align: right;
 }

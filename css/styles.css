@@ -473,7 +473,7 @@ COA FILTERS
 }
 
 /* =========================
-CHART OF ACCOUNTS - BLACK ORANGE THEME
+CHART OF ACCOUNTS - CLEAN FINAL
 ========================= */
 
 #coa{
@@ -481,38 +481,45 @@ CHART OF ACCOUNTS - BLACK ORANGE THEME
 }
 
 #coa h2{
-  font-size: 34px;
-  font-weight: 800;
-  margin: 6px 0 18px;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 42px;
+  font-weight: 700;
+  margin: 6px 0 22px;
   color: #181818;
-  letter-spacing: -0.5px;
+  letter-spacing: -0.6px;
 }
 
-/* Summary cards */
+#coa-summary{
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+  max-width: 1000px;
+  margin: 12px 0 18px;
+}
+
 .coa-summary-card{
-  background: linear-gradient(180deg, #fff7f1 0%, #ffffff 100%);
-  border: 1px solid #ffd7bd;
+  background: linear-gradient(180deg, #fff8f3 0%, #ffffff 100%);
+  border: 1px solid #f3c7a6;
   border-radius: 16px;
   padding: 16px;
-  box-shadow: 0 8px 22px rgba(255, 106, 0, 0.08);
+  box-shadow: 0 8px 20px rgba(255, 106, 0, 0.06);
 }
 
 .coa-summary-title{
-  font-size: 13px;
+  font-size: 14px;
   color: #9a5a2c;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: 0.4px;
+  letter-spacing: 0.5px;
 }
 
 .coa-summary-value{
-  font-size: 28px;
+  font-size: 18px;
   font-weight: 800;
   color: #1c1c1c;
 }
 
-/* Filter buttons */
 #filters{
   margin: 14px 0 16px;
   display: flex;
@@ -538,7 +545,6 @@ CHART OF ACCOUNTS - BLACK ORANGE THEME
   transform: translateY(-1px);
 }
 
-/* Table wrapper feel */
 #coa table{
   width: 100%;
   border-collapse: collapse;
@@ -549,22 +555,23 @@ CHART OF ACCOUNTS - BLACK ORANGE THEME
   box-shadow: 0 12px 28px rgba(0,0,0,0.08);
 }
 
-/* Table header */
 #coa thead th{
   background: linear-gradient(180deg, #1c1c1f 0%, #111214 100%);
   color: #ffffff;
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 800;
   text-align: left;
-  padding: 14px 12px;
+  padding: 16px 12px;
   border-bottom: 2px solid #ff7a1a;
   white-space: nowrap;
 }
 
-/* Table body */
 #coa tbody td{
   padding: 16px 12px;
   font-size: 15px;
+  color: #222;
+  border-bottom: 1px solid #f3e2d5;
+  vertical-align: middle;
 }
 
 #coa tbody tr:nth-child(even){
@@ -575,25 +582,23 @@ CHART OF ACCOUNTS - BLACK ORANGE THEME
   background: #fff1e6;
 }
 
-/* Balance column */
+#coa tbody td:first-child{
+  font-weight: 700;
+  color: #a14d12;
+  font-size: 16px;
+}
+
 #coa tbody td:nth-child(5){
   font-weight: 800;
+  font-size: 16px;
   color: #111;
   text-align: right;
 }
 
-/* Actions column */
 #coa tbody td:last-child{
   text-align: right;
 }
 
-/* Code column */
-#coa tbody td:first-child{
-  font-weight: 700;
-  color: #7a3d12;
-}
-
-/* Action button */
 .coa-action-btn{
   padding: 7px 12px;
   border: 1px solid #ffb37b;
@@ -611,91 +616,40 @@ CHART OF ACCOUNTS - BLACK ORANGE THEME
   border-color: #ff6a00;
 }
 
-/* Dropdown menu */
 .coa-menu{
-  display:none;
-  position:absolute;
-  right:0;
-  top:34px;
+  display: none;
+  position: absolute;
+  right: 0;
+  top: 34px;
   min-width: 150px;
-  border:1px solid #ffd0ad;
-  background:#ffffff;
-  border-radius:12px;
+  border: 1px solid #ffd0ad;
+  background: #ffffff;
+  border-radius: 12px;
   box-shadow: 0 14px 24px rgba(0,0,0,0.14);
-  padding:6px;
-  z-index:999;
+  padding: 6px;
+  z-index: 999;
 }
 
 .coa-menu button{
-  width:100%;
-  text-align:left;
-  padding:10px 12px;
-  border:0;
-  background:transparent;
-  cursor:pointer;
-  border-radius:10px;
+  width: 100%;
+  text-align: left;
+  padding: 10px 12px;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  border-radius: 10px;
   color: #222;
   font-weight: 600;
 }
 
 .coa-menu button:hover{
-  background:#fff1e6;
+  background: #fff1e6;
 }
 
 .coa-menu .danger{
-  color:#c23b00;
+  color: #c23b00;
 }
 
 .coa-menu .danger:hover{
-  background:#ffe6d8;
-}
-
-#app{
-  background: #ffffff;
-  margin: 20px;
-  padding: 20px;
-  border-radius: 14px;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-}
-
-#coa h2{
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: 42px;
-  font-weight: 700;
-  margin: 6px 0 22px;
-  color: #181818;
-}
-
-.coa-summary-title{
-  font-size: 14px;
-  color: #9a5a2c;
-  margin-bottom: 10px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-}
-
-.coa-summary-value{
-  font-size: 18px;
-  font-weight: 800;
-  color: #1c1c1c;
-}
-
-#coa thead th{
-  font-size: 15px;
-  font-weight: 800;
-  padding: 16px 12px;
-}
-
-#coa tbody td:first-child{
-  font-weight: 700;
-  color: #a14d12;
-  font-size: 16px;
-}
-
-#coa tbody td:nth-child(5){
-  font-weight: 800;
-  font-size: 16px;
-  color: #111;
-  text-align: right;
+  background: #ffe6d8;
 }

@@ -1860,7 +1860,7 @@ window.downloadProfitLossPDF = async function downloadProfitLossPDF() {
 
   let logoData = null;
   try {
-    logoData = await loadImageAsDataURL("./exodia-icon.png");
+    logoData = await loadImageAsDataURL("./img/exodia-icon.png");
   } catch (e) {
     console.warn("Logo failed to load:", e);
   }

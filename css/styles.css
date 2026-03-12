@@ -843,7 +843,12 @@ JOURNAL ENTRY - PREMIUM CLEAN
   width: 100%;
   max-width: 1200px;
   margin: auto;
-  }
+  background: linear-gradient(180deg, #ffffff 0%, #fffdfa 100%);
+  border: 1px solid #f0ddd0;
+  border-radius: 18px;
+  box-shadow: 0 12px 28px rgba(0,0,0,0.06);
+  padding: 26px 32px;
+}
 
 .je-section-title{
   font-size: 18px;
@@ -856,25 +861,27 @@ JOURNAL ENTRY - PREMIUM CLEAN
   display: grid;
   grid-template-columns: 220px 1fr;
   gap: 14px;
-  max-width: 940px;
+  max-width: 100%;
 }
 
 .je-grid label{
   display: grid;
   gap: 7px;
-  font-size: 14px;
-  color: #4b4b4b;
+  font-size: 15px;
+  color: #2b2b2b;
   font-weight: 600;
 }
 
 .je-grid input,
 .je-grid textarea,
 .je-grid select{
+  width: 100%;
   border: 1px solid #e7cdb8;
   border-radius: 10px;
   background: #fff;
   padding: 13px 14px;
   font-size: 15px;
+  box-sizing: border-box;
   transition: all 0.18s ease;
 }
 
@@ -886,6 +893,12 @@ JOURNAL ENTRY - PREMIUM CLEAN
   box-shadow: 0 0 0 4px rgba(255, 106, 0, 0.10);
 }
 
+.je-grid input::placeholder,
+.je-grid textarea::placeholder{
+  color: #8a8a8a;
+  font-size: 14px;
+}
+
 .je-lines-wrap{
   margin-top: 22px;
 }
@@ -893,18 +906,25 @@ JOURNAL ENTRY - PREMIUM CLEAN
 .je-lines-table{
   width: 100%;
   max-width: 100%;
-  }
+  border-collapse: collapse;
+  table-layout: fixed;
+  background: #fff;
+  border: 1px solid #f0ddd0;
+  border-radius: 14px;
+  overflow: hidden;
+  box-shadow: 0 8px 18px rgba(0,0,0,0.08);
+}
 
 .je-lines-table th{
-  background: linear-gradient(180deg,#1c1c1f 0%,#111214 100%);
-  color:#ffffff;
-  font-weight:800;
-  font-size:15px;
-  padding:14px 12px;
-  text-align:center;
-  border-bottom:2px solid #ff7a1a;
+  background: linear-gradient(180deg, #1c1c1f 0%, #111214 100%);
+  color: #ffffff;
+  font-weight: 800;
+  font-size: 15px;
+  padding: 14px 12px;
+  text-align: center;
+  border-bottom: 2px solid #ff7a1a;
 }
-  
+
 .je-lines-table td{
   border-bottom: 1px solid #f3e3d7;
   padding: 10px 8px;
@@ -933,6 +953,12 @@ JOURNAL ENTRY - PREMIUM CLEAN
   outline: none;
   border-color: #ff8a3d;
   box-shadow: 0 0 0 4px rgba(255, 106, 0, 0.08);
+}
+
+.je-lines-table td:nth-child(2),
+.je-lines-table td:nth-child(3){
+  font-weight: 700;
+  text-align: right;
 }
 
 .je-actions{
@@ -979,10 +1005,4 @@ JOURNAL ENTRY - PREMIUM CLEAN
   font-size: 14px;
   font-weight: 700;
   color: #444;
-}
-
-.je-lines-table td:nth-child(2),
-.je-lines-table td:nth-child(3){
-  font-weight:700;
-  text-align:right;
 }

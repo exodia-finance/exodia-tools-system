@@ -862,15 +862,15 @@ JOURNAL ENTRY - PREMIUM CLEAN
   max-width: 100%;
 
 .je-lines-table th{
-  background: linear-gradient(180deg, #1c1c1f 0%, #111214 100%);
-  color: #ffffff;
-  font-weight: 800;
-  font-size: 15px;
-  border-bottom: 2px solid #ff7a1a;
-  padding: 14px 12px;
-  text-align: center;
+  background: linear-gradient(180deg,#1c1c1f 0%,#111214 100%);
+  color:#ffffff;
+  font-weight:800;
+  font-size:15px;
+  padding:14px 12px;
+  text-align:center;
+  border-bottom:2px solid #ff7a1a;
 }
-
+  
 .je-lines-table td{
   border-bottom: 1px solid #f3e3d7;
   padding: 10px 8px;
@@ -945,4 +945,10 @@ JOURNAL ENTRY - PREMIUM CLEAN
   font-size: 14px;
   font-weight: 700;
   color: #444;
+}
+
+.je-lines-table td:nth-child(2),
+.je-lines-table td:nth-child(3){
+  font-weight:700;
+  text-align:right;
 }

@@ -1738,7 +1738,9 @@ window.downloadTrialBalancePDF = function downloadTrialBalancePDF() {
   doc.text(title, 14, 18);
 
   doc.setFontSize(10);
-  doc.text(subtitle, 14, 25);
+  if (subtitle) {
+  doc.text(subtitle, 14, 40);
+}
 
   const balances = computeBalances();
 
@@ -1850,10 +1852,24 @@ window.downloadProfitLossPDF = function downloadProfitLossPDF() {
 const reportTitle = "Statement of Profit and Loss";
 const generatedOn = new Date().toLocaleString();
 
-let subtitle = "For the reporting period";
-if (filterFrom && filterTo) subtitle = `For the period from ${filterFrom} to ${filterTo}`;
-else if (filterTo) subtitle = `For the period ended ${filterTo}`;
-else if (filterFrom) subtitle = `Beginning ${filterFrom}`;
+function formatDatePretty(d) {
+  if (!d) return "";
+  const date = new Date(d);
+  return date.toLocaleDateString(undefined, {
+    year: "numeric",
+    month: "long",
+    day: "numeric"
+  });
+}
+
+let subtitle = "";
+if (filterFrom && filterTo) {
+  subtitle = `For the period from ${formatDatePretty(filterFrom)} to ${formatDatePretty(filterTo)}`;
+} else if (filterTo) {
+  subtitle = `For the period ended ${formatDatePretty(filterTo)}`;
+} else if (filterFrom) {
+  subtitle = `Beginning ${formatDatePretty(filterFrom)}`;
+}
   
   // -----------------------------
   // Recompute P&L data safely
@@ -2029,11 +2045,11 @@ else if (filterFrom) subtitle = `Beginning ${filterFrom}`;
   // Information box
   // -----------------------------
   doc.setFillColor(...COLOR_LIGHT);
-  doc.roundedRect(14, 46, pageWidth - 28, 36, 3, 3, "F");
+  doc.roundedRect(14, 46, pageWidth - 28, 28, 3, 3, "F");
 
   doc.setDrawColor(...COLOR_ORANGE);
   doc.setLineWidth(0.5);
-  doc.roundedRect(14, 46, pageWidth - 28, 36, 3, 3, "S");
+  doc.roundedRect(14, 46, pageWidth - 28, 28, 3, 3, "S");
 
   doc.setTextColor(...COLOR_BLACK);
   doc.setFont("helvetica", "bold");
@@ -2042,15 +2058,16 @@ else if (filterFrom) subtitle = `Beginning ${filterFrom}`;
 
   doc.setFont("helvetica", "normal");
   doc.setFontSize(9);
-  doc.text(`Document: ${reportTitle}`, 18, 59);
-  doc.text(`Prepared for: Internal Financial Review`, 18, 64);
-  doc.text(`Generated on: ${generatedOn}`, 18, 69);
+  doc.text(`Document: ${reportTitle}`, 18, 58);
+  doc.text(`Prepared for: Internal Management Reporting`, 18, 63);
+  doc.text(`Generated on: ${generatedOn}`, 18, 68);
+  doc.text(`Source: Exodia Ledger System`, 18, 73);
 
   // -----------------------------
   // Table
   // -----------------------------
   doc.autoTable({
-    startY: 90,
+    startY: 86,
     head: [["Particulars", "Amount"]],
     body: bodyRows,
     theme: "grid",

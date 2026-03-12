@@ -1100,3 +1100,21 @@ JOURNAL HISTORY
   font-weight: 600;
   color: #555;
 }
+
+/* =========================
+JOURNAL STATUS MESSAGE
+========================= */
+
+.je-status{
+  margin-top: 14px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: #fff7f1;
+  border: 1px solid #f3d3bc;
+  color: #8a420c;
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.4;
+  display: inline-block;
+  min-width: 280px;
+}

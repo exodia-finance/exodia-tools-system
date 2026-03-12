@@ -430,6 +430,38 @@ body{
   color:#222;
 }
 
+/* your existing styles above */
+
+/* =========================
+JOURNAL INPUT IMPROVEMENT
+========================= */
+
+.je-grid input{
+  width: 100%;
+  padding: 12px 14px;
+  font-size: 15px;
+  border-radius: 10px;
+}
+
+.je-grid label{
+  display: grid;
+  gap: 6px;
+  font-size: 15px;
+  font-weight: 600;
+  color: #2b2b2b;
+}
+
+.je-section-title{
+  font-size: 18px;
+  font-weight: 700;
+  color:#222;
+}
+
+.je-grid input::placeholder{
+  color:#8a8a8a;
+  font-size:14px;
+}
+
 /* =========================
 AUTH BOX
 ========================= */
@@ -811,6 +843,7 @@ JOURNAL ENTRY - PREMIUM CLEAN
   width: 100%;
   max-width: 1200px;
   margin: auto;
+  }
 
 .je-section-title{
   font-size: 18px;
@@ -860,6 +893,7 @@ JOURNAL ENTRY - PREMIUM CLEAN
 .je-lines-table{
   width: 100%;
   max-width: 100%;
+  }
 
 .je-lines-table th{
   background: linear-gradient(180deg,#1c1c1f 0%,#111214 100%);

@@ -1007,6 +1007,12 @@ JOURNAL ENTRY - PREMIUM CLEAN
   color: #444;
 }
 
+/* Strong error border */
+input:required:invalid:focus{
+  border:2px solid #ff0000;
+  box-shadow:0 0 0 3px rgba(255,0,0,0.15);
+}
+
 /* =========================
 JOURNAL STATUS MESSAGE
 ========================= */
@@ -1023,6 +1029,18 @@ JOURNAL STATUS MESSAGE
   line-height: 1.4;
   display: inline-block;
   min-width: 280px;
+}
+
+/* Required fields highlight */
+input:required:invalid,
+textarea:required:invalid{
+  border:2px solid #e00000;
+  background:#fff7f7;
+}
+
+input:required:invalid:focus{
+  border:2px solid #ff0000;
+  box-shadow:0 0 0 3px rgba(255,0,0,0.15);
 }
 
 /* =========================

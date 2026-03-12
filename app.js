@@ -1846,15 +1846,15 @@ window.downloadProfitLossPDF = function downloadProfitLossPDF() {
   const COLOR_BORDER = [225, 225, 225];
 
   // Report texts
-  const companyName = "Exodia Services Inc.";
-  const reportTitle = "Statement of Profit and Loss";
-  const generatedOn = new Date().toLocaleString();
+  const companyName = "Exodia Gaming Development Inc.";
+const reportTitle = "Statement of Profit and Loss";
+const generatedOn = new Date().toLocaleString();
 
-  let subtitle = "For the selected reporting period";
-  if (filterFrom && filterTo) subtitle = `For the period ${filterFrom} to ${filterTo}`;
-  else if (filterFrom) subtitle = `From ${filterFrom}`;
-  else if (filterTo) subtitle = `Up to ${filterTo}`;
-
+let subtitle = "For the reporting period";
+if (filterFrom && filterTo) subtitle = `For the period from ${filterFrom} to ${filterTo}`;
+else if (filterTo) subtitle = `For the period ended ${filterTo}`;
+else if (filterFrom) subtitle = `Beginning ${filterFrom}`;
+  
   // -----------------------------
   // Recompute P&L data safely
   // -----------------------------
@@ -2018,20 +2018,22 @@ window.downloadProfitLossPDF = function downloadProfitLossPDF() {
   doc.setFontSize(17);
   doc.text(reportTitle, 14, 34);
 
-  doc.setFont("helvetica", "normal");
-  doc.setFontSize(10);
-  doc.setTextColor(...COLOR_GRAY);
-  doc.text(subtitle, 14, 40);
+ doc.setFont("helvetica", "normal");
+ doc.setFontSize(9);
+ doc.text(`Document: ${reportTitle}`, 18, 59);
+ doc.text(`Prepared for: Internal Management Reporting`, 18, 64);
+ doc.text(`Generated on: ${generatedOn}`, 18, 69);
+ doc.text(`Source: Exodia Ledger System`, 18, 74);
 
   // -----------------------------
   // Information box
   // -----------------------------
   doc.setFillColor(...COLOR_LIGHT);
-  doc.roundedRect(14, 46, pageWidth - 28, 30, 3, 3, "F");
+  doc.roundedRect(14, 46, pageWidth - 28, 36, 3, 3, "F");
 
   doc.setDrawColor(...COLOR_ORANGE);
   doc.setLineWidth(0.5);
-  doc.roundedRect(14, 46, pageWidth - 28, 30, 3, 3, "S");
+  doc.roundedRect(14, 46, pageWidth - 28, 36, 3, 3, "S");
 
   doc.setTextColor(...COLOR_BLACK);
   doc.setFont("helvetica", "bold");
@@ -2048,7 +2050,7 @@ window.downloadProfitLossPDF = function downloadProfitLossPDF() {
   // Table
   // -----------------------------
   doc.autoTable({
-    startY: 84,
+    startY: 90,
     head: [["Particulars", "Amount"]],
     body: bodyRows,
     theme: "grid",

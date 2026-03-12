@@ -793,7 +793,9 @@ JOURNAL ENTRY - PREMIUM CLEAN
 
 #journal{
   padding: 24px;
-  max-width: 1100px;
+  width: 100%;
+  max-width: 1300px;
+  margin: auto;
 }
 
 #journal h2{
@@ -806,14 +808,9 @@ JOURNAL ENTRY - PREMIUM CLEAN
 }
 
 .je-card{
-  max-width: 980px;
-  background: linear-gradient(180deg, #ffffff 0%, #fffdfa 100%);
-  border: 1px solid #f0ddd0;
-  border-radius: 18px;
-  box-shadow: 0 12px 28px rgba(0,0,0,0.06);
-  padding: 22px;
-  margin-top: 12px;
-}
+  width: 100%;
+  max-width: 1200px;
+  margin: auto;
 
 .je-section-title{
   font-size: 18px;
@@ -862,15 +859,7 @@ JOURNAL ENTRY - PREMIUM CLEAN
 
 .je-lines-table{
   width: 100%;
-  max-width: 940px;
-  border-collapse: collapse;
-  table-layout: fixed;
-  background: #fff;
-  border: 1px solid #f0ddd0;
-  border-radius: 14px;
-  overflow: hidden;
-  box-shadow: 0 8px 18px rgba(0,0,0,0.04);
-}
+  max-width: 100%;
 
 .je-lines-table th{
   background: linear-gradient(180deg, #1c1c1f 0%, #111214 100%);

@@ -1221,7 +1221,11 @@ JOURNAL HISTORY - FIT WITHOUT SIDE SCROLL
 #journal-history tbody td:nth-child(1),
 #journal-history tbody td:nth-child(2),
 #journal-history tbody td:nth-child(3){
-  font-size: 12px;
+  font-size: 13px;
+}
+
+#journal-history tbody td:nth-child(1){
+  font-weight:600;
 }
 
 #journal-history thead th:last-child,

@@ -2202,7 +2202,12 @@ if (subtitle) {
     margin: { left: 14, right: 14 }
   });
 
-  const finalY = doc.lastAutoTable.finalY || 100;
+  let finalY = doc.lastAutoTable.finalY || 100;
+
+if (finalY + 30 > pageHeight - 10) {
+  doc.addPage();
+  finalY = 20;
+}
 
   doc.setFillColor(...COLOR_ORANGE);
   doc.roundedRect(14, finalY + 8, pageWidth - 28, 14, 2, 2, "F");
@@ -2501,31 +2506,37 @@ window.downloadStatementOfFinancialPositionPDF = async function downloadStatemen
     margin: { left: 14, right: 14 }
   });
 
-  const finalY = doc.lastAutoTable.finalY || 100;
+let finalY = doc.lastAutoTable.finalY || 100;
 
-  doc.setFillColor(...COLOR_ORANGE);
-  doc.roundedRect(14, finalY + 8, pageWidth - 28, 14, 2, 2, "F");
+// if not enough space for total box + footer, move to new page
+if (finalY + 30 > pageHeight - 10) {
+  doc.addPage();
+  finalY = 20;
+}
 
-  doc.setTextColor(255, 255, 255);
-  doc.setFont("helvetica", "bold");
-  doc.setFontSize(11);
-  doc.text("Total Liabilities and Equity", 18, finalY + 17);
+doc.setFillColor(...COLOR_ORANGE);
+doc.roundedRect(14, finalY + 8, pageWidth - 28, 14, 2, 2, "F");
 
-  doc.text(
-    money(totalLiabilities + totalEquity),
-    pageWidth - 18,
-    finalY + 17,
-    { align: "right" }
-  );
+doc.setTextColor(255, 255, 255);
+doc.setFont("helvetica", "bold");
+doc.setFontSize(11);
+doc.text("Total Liabilities and Equity", 18, finalY + 17);
 
-  doc.setFont("helvetica", "italic");
-  doc.setFontSize(8.5);
-  doc.setTextColor(...COLOR_GRAY);
-  doc.text(
-    "This report was generated from the Exodia Ledger system for internal use.",
-    14,
-    pageHeight - 10
-  );
+doc.text(
+  money(totalLiabilities + totalEquity),
+  pageWidth - 18,
+  finalY + 17,
+  { align: "right" }
+);
+
+doc.setFont("helvetica", "italic");
+doc.setFontSize(8.5);
+doc.setTextColor(...COLOR_GRAY);
+doc.text(
+  "This report was generated from the Exodia Ledger system for internal use.",
+  14,
+  pageHeight - 10
+);
 
   doc.save("statement-of-financial-position.pdf");
 };

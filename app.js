@@ -2072,7 +2072,7 @@ window.downloadProfitLossPDF = async function downloadProfitLossPDF() {
   doc.rect(0, 34, pageWidth, 4, "F");
 
 if (logoData) {
-  const logoWidth = 80;
+  const logoWidth = 120;
   const logoHeight = 24;
   const logoX = (pageWidth - logoWidth) / 2;
   const logoY = 5;
@@ -2099,7 +2099,7 @@ doc.setFont("helvetica", "normal");
 doc.setFontSize(9.5);
 doc.setTextColor(...COLOR_GRAY);
 if (subtitle) {
-  doc.text(subtitle, 14, 56);
+  doc.text(subtitle, pageWidth / 2, 56, { align: "center" });
 }
 
   // Information box

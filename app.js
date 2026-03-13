@@ -1518,7 +1518,7 @@ function renderProfitAndLoss() {
     .filter((a) => normalizeAccountType(a.type) === "Revenue")
     .sort((a, b) => {
       const ca = codeNum(a.code);
-      const cb = codeNum(b.codex1);
+      const cb = codeNum(b.code);
       if (ca !== cb) return ca - cb;
       return String(a.name || "").localeCompare(String(b.name || ""));
     });

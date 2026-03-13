@@ -1683,37 +1683,96 @@ function renderStatementOfFinancialPosition() {
 
   const balances = computeBalances();
 
+  const assetAccounts = COA
+    .filter((a) => normalizeAccountType(a.type) === "Asset")
+    .sort((a, b) => {
+      const ca = codeNum(a.code);
+      const cb = codeNum(b.code);
+      if (ca !== cb) return ca - cb;
+      return String(a.name || "").localeCompare(String(b.name || ""));
+    });
+
+  const liabilityAccounts = COA
+    .filter((a) => normalizeAccountType(a.type) === "Liability")
+    .sort((a, b) => {
+      const ca = codeNum(a.code);
+      const cb = codeNum(b.code);
+      if (ca !== cb) return ca - cb;
+      return String(a.name || "").localeCompare(String(b.name || ""));
+    });
+
+  const equityAccounts = COA
+    .filter((a) => normalizeAccountType(a.type) === "Equity")
+    .sort((a, b) => {
+      const ca = codeNum(a.code);
+      const cb = codeNum(b.code);
+      if (ca !== cb) return ca - cb;
+      return String(a.name || "").localeCompare(String(b.name || ""));
+    });
+
   let totalAssets = 0;
   let totalLiabilities = 0;
   let totalEquity = 0;
 
-  COA.forEach((a) => {
-    const bal = balances[a.id] || 0;
-    const type = String(a.type || "").trim();
+  const addSectionHeader = (label) => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td colspan="3" style="font-weight:bold; background:#f5f5f5;">${esc(label)}</td>
+    `;
+    tbody.appendChild(tr);
+  };
 
-    if (type === "Asset" || type === "Assets") totalAssets += bal;
-    if (type === "Liability" || type === "Liabilities") totalLiabilities += bal;
-    if (type === "Equity") totalEquity += bal;
+  const addAccountRow = (acct, amount) => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${esc(acct.code || "")}</td>
+      <td>${esc(acct.name || "")}</td>
+      <td style="text-align:right;">${money(amount)}</td>
+    `;
+    tbody.appendChild(tr);
+  };
+
+  const addTotalRow = (label, amount) => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td colspan="2"><b>${esc(label)}</b></td>
+      <td style="text-align:right;"><b>${money(amount)}</b></td>
+    `;
+    tbody.appendChild(tr);
+  };
+
+  // ASSETS
+  addSectionHeader("Assets");
+  assetAccounts.forEach((acct) => {
+    const bal = balances[acct.id] || 0;
+    if (Math.abs(bal) < 0.00001) return;
+    totalAssets += bal;
+    addAccountRow(acct, bal);
   });
+  addTotalRow("Total Assets", totalAssets);
 
-  tbody.innerHTML = `
-    <tr>
-      <td><b>Total Assets</b></td>
-      <td style="text-align:right;">${money(totalAssets)}</td>
-    </tr>
-    <tr>
-      <td><b>Total Liabilities</b></td>
-      <td style="text-align:right;">${money(totalLiabilities)}</td>
-    </tr>
-    <tr>
-      <td><b>Total Equity</b></td>
-      <td style="text-align:right;">${money(totalEquity)}</td>
-    </tr>
-    <tr>
-      <td><b>Total Liabilities and Equity</b></td>
-      <td style="text-align:right;">${money(totalLiabilities + totalEquity)}</td>
-    </tr>
-  `;
+  // LIABILITIES
+  addSectionHeader("Liabilities");
+  liabilityAccounts.forEach((acct) => {
+    const bal = balances[acct.id] || 0;
+    if (Math.abs(bal) < 0.00001) return;
+    totalLiabilities += bal;
+    addAccountRow(acct, bal);
+  });
+  addTotalRow("Total Liabilities", totalLiabilities);
+
+  // EQUITY
+  addSectionHeader("Equity");
+  equityAccounts.forEach((acct) => {
+    const bal = balances[acct.id] || 0;
+    if (Math.abs(bal) < 0.00001) return;
+    totalEquity += bal;
+    addAccountRow(acct, bal);
+  });
+  addTotalRow("Total Equity", totalEquity);
+
+  // TOTAL LIAB + EQUITY
+  addTotalRow("Total Liabilities and Equity", totalLiabilities + totalEquity);
 }
 
 window.downloadTrialBalancePDF = function downloadTrialBalancePDF() {

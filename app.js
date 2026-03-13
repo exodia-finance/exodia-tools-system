@@ -188,7 +188,7 @@ async function sbFetchJournalEntries() {
     .from("journal_entries")
     .select("*")
     .eq("user_id", currentUser.id)
-    .eq("is_deleted", false)
+    .or("is_deleted.is.null,is_deleted.eq.false")
     .order("created_at", { ascending: false });
 
   if (error) {
@@ -215,7 +215,7 @@ async function sbFetchJournalLines() {
       )
     `)
     .eq("user_id", currentUser.id)
-    .eq("is_deleted", false)
+    .or("is_deleted.is.null,is_deleted.eq.false")
     .order("created_at", { ascending: true });
 
   if (error) {
@@ -252,7 +252,7 @@ async function sbFetchJournalLinesByJournalId(journal_id) {
     .select("*")
     .eq("journal_id", journal_id)
     .eq("user_id", currentUser.id)
-    .eq("is_deleted", false)
+    .or("is_deleted.is.null,is_deleted.eq.false")
     .order("created_at", { ascending: true });
 
   if (error) {
@@ -271,7 +271,7 @@ async function sbFetchJournalLinesForEntry(journal_id) {
     .select("*")
     .eq("user_id", currentUser.id)
     .eq("journal_id", journal_id)
-    .eq("is_deleted", false)
+    .or("is_deleted.is.null,is_deleted.eq.false")
     .order("created_at", { ascending: true });
 
   if (error) {
@@ -633,13 +633,15 @@ window.applyDateRangeFilter = function () {
     renderCOA();
   renderLedger();
 
-  const wsTrial = $("ws-trial");
-  const wsPL = $("ws-pl");
-  const wsSFP = $("ws-sfp");
+ const wsTrial = $("ws-trial");
+const wsPL = $("ws-pl");
+const wsSFP = $("ws-sfp");
+const wsFRS = $("ws-frs");
 
-  if (wsPL && wsPL.style.display === "block") renderProfitAndLoss();
-  else if (wsSFP && wsSFP.style.display === "block") renderStatementOfFinancialPosition();
-  else renderTrialBalance();
+if (wsPL && wsPL.style.display === "block") renderProfitAndLoss();
+else if (wsSFP && wsSFP.style.display === "block") renderStatementOfFinancialPosition();
+else if (wsFRS && wsFRS.style.display === "block") renderFinancialReportSummary();
+else renderTrialBalance();
 };
 
 window.clearDateRange = function () {
@@ -654,12 +656,14 @@ window.clearDateRange = function () {
   renderLedger();
 
   const wsTrial = $("ws-trial");
-  const wsPL = $("ws-pl");
-  const wsSFP = $("ws-sfp");
+const wsPL = $("ws-pl");
+const wsSFP = $("ws-sfp");
+const wsFRS = $("ws-frs");
 
-  if (wsPL && wsPL.style.display === "block") renderProfitAndLoss();
-  else if (wsSFP && wsSFP.style.display === "block") renderStatementOfFinancialPosition();
-  else renderTrialBalance();
+if (wsPL && wsPL.style.display === "block") renderProfitAndLoss();
+else if (wsSFP && wsSFP.style.display === "block") renderStatementOfFinancialPosition();
+else if (wsFRS && wsFRS.style.display === "block") renderFinancialReportSummary();
+else renderTrialBalance();
 };
 
 // ==============================
@@ -2888,6 +2892,7 @@ function renderHistory() {
   sbFetchJournalEntries()
     .then((entries) => {
       tbody.innerHTML = "";
+      console.log("Journal entries loaded:", entries);
 
       if (!entries || entries.length === 0) {
         if (status) status.textContent = "No journal entries found.";

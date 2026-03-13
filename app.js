@@ -1743,29 +1743,28 @@ function renderStatementOfFinancialPosition() {
 
   addSectionRow("Assets");
   assetAccounts.forEach((acct) => {
-    const bal = balances[acct.id] || 0;
-    if (Math.abs(bal) < 0.00001) return;
-    totalAssets += bal;
-    addAccountRow(acct, bal);
-  });
+  const bal = balances[acct.id] || 0;
+  totalAssets += bal;
+  addAccountRow(acct, bal);
+});
   addTotalRow("Total Assets", totalAssets);
 
   addSectionRow("Liabilities");
   liabilityAccounts.forEach((acct) => {
-    const bal = balances[acct.id] || 0;
-    if (Math.abs(bal) < 0.00001) return;
-    totalLiabilities += bal;
-    addAccountRow(acct, bal);
-  });
+  const bal = balances[acct.id] || 0;
+  totalLiabilities += bal;
+  addAccountRow(acct, bal);
+});
+  
   addTotalRow("Total Liabilities", totalLiabilities);
 
   addSectionRow("Equity");
-  equityAccounts.forEach((acct) => {
-    const bal = balances[acct.id] || 0;
-    if (Math.abs(bal) < 0.00001) return;
-    totalEquity += bal;
-    addAccountRow(acct, bal);
-  });
+equityAccounts.forEach((acct) => {
+  const bal = balances[acct.id] || 0;
+  totalEquity += bal;
+  addAccountRow(acct, bal);
+});
+  
   addTotalRow("Total Equity", totalEquity);
 
   addTotalRow("Total Liabilities and Equity", totalLiabilities + totalEquity);

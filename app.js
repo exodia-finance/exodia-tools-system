@@ -2072,8 +2072,8 @@ window.downloadProfitLossPDF = async function downloadProfitLossPDF() {
   doc.rect(0, 34, pageWidth, 4, "F");
 
 if (logoData) {
-  const logoWidth = 60;
-  const logoHeight = 20;
+  const logoWidth = 80;
+  const logoHeight = 24;
   const logoX = (pageWidth - logoWidth) / 2;
   const logoY = 5;
 
@@ -2082,7 +2082,6 @@ if (logoData) {
   doc.setTextColor(255, 255, 255);
   doc.setFont("helvetica", "bold");
   doc.setFontSize(11);
-  doc.text(companyName, pageWidth / 2, 28, { align: "center" });
 } else {
   doc.setTextColor(255, 255, 255);
   doc.setFont("helvetica", "bold");
@@ -2094,7 +2093,7 @@ if (logoData) {
   doc.setTextColor(...COLOR_BLACK);
   doc.setFont("helvetica", "bold");
   doc.setFontSize(17);
-  doc.text(reportTitle, 14, 50);
+  doc.text(reportTitle, pageWidth/2, 46, {align:"center"});
 
 doc.setFont("helvetica", "normal");
 doc.setFontSize(9.5);

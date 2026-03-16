@@ -1268,6 +1268,35 @@ function computeBalancesAsOf(endDate) {
   return balances;
 }
 
+// ==============================
+// Compute Current Earnings (Revenue - Expense)
+// ==============================
+function computeCurrentEarningsAsOf(endDate) {
+  let revenue = 0;
+  let expense = 0;
+
+  lines
+    .filter((l) => !l.is_deleted)
+    .filter((l) => {
+      const d = String(l.entry_date || "");
+      if (endDate && d > endDate) return false;
+      return true;
+    })
+    .forEach((l) => {
+      const acctId = l.resolvedAccountId || l.accountId;
+      const acct = COA_BY_ID[acctId];
+      const type = normalizeAccountType(acct?.type);
+
+      if (type === "Revenue") {
+        revenue += num(l.credit) - num(l.debit);
+      } else if (type === "Expense") {
+        expense += num(l.debit) - num(l.credit);
+      }
+    });
+
+  return revenue - expense;
+}
+
 function normalizeAccountType(type) {
   const t = String(type || "").trim().toLowerCase();
 
@@ -1826,6 +1855,16 @@ equityAccounts.forEach((acct) => {
   totalEquity += bal;
   addAccountRow(acct, bal);
 });
+
+  // Add current period profit/loss into equity
+const currentEarnings = computeCurrentEarningsAsOf(filterTo || "");
+
+addAccountRow(
+  { code: "", name: "Current Period Profit / Loss" },
+  currentEarnings
+);
+
+totalEquity += currentEarnings;
   
   addTotalRow("Total Equity", totalEquity);
 
@@ -1932,11 +1971,9 @@ window.downloadTrialBalancePDF = function downloadTrialBalancePDF() {
   const from = filterFrom || "";
   const to = filterTo || "";
 
-  let subtitle = "All transactions";
-  if (from && to) subtitle = `Date Range: ${from} to ${to}`;
-  else if (from) subtitle = `From: ${from}`;
-  else if (to) subtitle = `To: ${to}`;
-
+  let subtitle = "As of current date";
+if (to) subtitle = `As of ${to}`;
+  
   doc.setFontSize(16);
   doc.text(title, 14, 18);
 
@@ -2546,15 +2583,25 @@ window.downloadStatementOfFinancialPositionPDF = async function downloadStatemen
   ]);
 
   equityAccounts.forEach((acct) => {
-    const bal = balances[acct.id] || 0;
-    totalEquity += bal;
+  const bal = balances[acct.id] || 0;
+  totalEquity += bal;
 
-    bodyRows.push([
-      acct.code || "",
-      acct.name || "",
-      money(bal)
-    ]);
-  });
+  bodyRows.push([
+    acct.code || "",
+    acct.name || "",
+    money(bal)
+  ]);
+});
+
+const currentEarnings = computeCurrentEarningsAsOf(filterTo || "");
+
+bodyRows.push([
+  "",
+  "Current Period Profit / Loss",
+  money(currentEarnings)
+]);
+
+totalEquity += currentEarnings;
 
   bodyRows.push([
     { content: "", styles: { fontStyle: "bold" } },

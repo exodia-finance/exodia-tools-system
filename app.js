@@ -1216,18 +1216,17 @@ tr.innerHTML = `
 // ==============================
 // Compute balances
 // ==============================
-function computeBalances() {
+function computeBalancesAsOf(endDate) {
   const normals = Object.fromEntries(COA.map((a) => [a.id, a.normal]));
   const balances = {};
 
   lines
     .filter((l) => !l.is_deleted)
     .filter((l) => {
-  const d = String(l.entry_date || "");
-  if (filterFrom && d < filterFrom) return false;
-  if (filterTo && d > filterTo) return false;
-  return true;
-})
+      const d = String(l.entry_date || "");
+      if (endDate && d > endDate) return false;
+      return true;
+    })
     .forEach((l) => {
       const key = l.resolvedAccountId || l.accountId;
       const normal = normals[key] || "Debit";
@@ -1474,7 +1473,7 @@ function renderTrialBalance() {
   tbody.innerHTML = "";
   if (status) status.textContent = "";
 
-  const balances = computeBalances();
+  const balances = computeBalancesAsOf(filterTo || "");
 
   const typeOrder = { Asset: 1, Liability: 2, Equity: 3, Revenue: 4, Expense: 5 };
 

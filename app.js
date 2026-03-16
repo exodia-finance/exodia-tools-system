@@ -1033,7 +1033,7 @@ function renderCOA() {
   if (!tbody) return;
 
   tbody.innerHTML = "";
-  const balances = computeBalances();
+  const balances = computeBalancesAsOf(filterTo || "");
 
    const totalsByType = {
     Asset: 0,

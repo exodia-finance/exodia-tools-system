@@ -1051,10 +1051,11 @@ GENERAL LEDGER - PREMIUM CLEAN
 ========================= */
 
 #ledger{
-  padding: 24px;
+  padding: 24px 16px;
   width: 100%;
-  max-width: 1600px;   /* increased */
-  margin: auto;
+  max-width: 100%;
+  margin: 0 auto;
+  overflow-x: hidden;
 }
 
 #ledger h2{
@@ -1111,6 +1112,7 @@ GENERAL LEDGER - PREMIUM CLEAN
 
 #ledger table{
   width: 100%;
+  max-width: 100%;
   table-layout: fixed;
   border-collapse: collapse;
   background: #ffffff;
@@ -1124,23 +1126,33 @@ GENERAL LEDGER - PREMIUM CLEAN
 #ledger thead th{
   background: linear-gradient(180deg, #1c1c1f 0%, #111214 100%);
   color: #ffffff;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 800;
   text-align: center;
-  padding: 14px 10px;
+  padding: 12px 6px;
   border-bottom: 2px solid #ff7a1a;
   white-space: normal;
-  line-height: 1.25;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+  line-height: 1.2;
 }
 
-#ledger thead th:nth-child(1){ width: 90px; }
-#ledger thead th:nth-child(2){ width: 110px; }
-#ledger thead th:nth-child(4){ width: 90px; }
-#ledger thead th:nth-child(5){ width: 90px; }
-#ledger thead th:nth-child(8){ width: 110px; }
-#ledger thead th:nth-child(9),
-#ledger thead th:nth-child(10),
-#ledger thead th:nth-child(11){ width: 95px; }
+#ledger th,
+#ledger td{
+  min-width: 0;
+}
+
+#ledger thead th:nth-child(1){ width: 7%; }
+#ledger thead th:nth-child(2){ width: 9%; }
+#ledger thead th:nth-child(3){ width: 16%; }
+#ledger thead th:nth-child(4){ width: 6%; }
+#ledger thead th:nth-child(5){ width: 8%; }
+#ledger thead th:nth-child(6){ width: 12%; }
+#ledger thead th:nth-child(7){ width: 14%; }
+#ledger thead th:nth-child(8){ width: 9%; }
+#ledger thead th:nth-child(9){ width: 6%; }
+#ledger thead th:nth-child(10){ width: 6%; }
+#ledger thead th:nth-child(11){ width: 7%; }
 
 /* Body cells */
 #ledger tbody td{
@@ -1225,9 +1237,14 @@ GENERAL LEDGER - PREMIUM CLEAN
   padding: 18px;
 }
 
-#ledger{
+html, body{
+  width: 100%;
+  max-width: 100%;
   overflow-x: hidden;
 }
 
+*{
+  box-sizing: border-box;
+}
 
 

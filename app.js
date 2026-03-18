@@ -1172,7 +1172,7 @@ function renderCOA() {
 
 if (list.length === 0) {
   const tr = document.createElement("tr");
-  tr.innerHTML = `<td colspan="6">No accounts found for this filter.</td>`;
+  tr.innerHTML = `<td colspan="11" style="text-align:center;">No transactions found for the selected account within the specified date range.</td>`;
   tbody.appendChild(tr);
 }
 }

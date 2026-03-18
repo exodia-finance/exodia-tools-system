@@ -1422,3 +1422,18 @@ GENERAL LEDGER - PREMIUM CLEAN
   padding: 18px;
 }
 
+#ledger thead th:nth-child(8),
+#ledger tbody td:nth-child(8){
+  position: sticky;
+  right: 0;
+  background: #fff;
+  z-index: 2;
+}
+
+/* header fix */
+#ledger thead th:nth-child(8){
+  background: #111214;
+}
+
+
+

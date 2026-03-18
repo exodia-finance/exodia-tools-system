@@ -4,6 +4,8 @@
 // Local UI memory keys
 // ==============================
 const LAST_VIEW_KEY = "exodiaLedger.lastView.v1";
+const TAB_VIEW_KEY = "exodiaLedger.currentTabView.v1";
+
 const FILTER_YEAR_KEY = "exodiaLedger.filterYear.v1";
 const FILTER_MONTH_KEY = "exodiaLedger.filterMonth.v1";
 const LEDGER_ACCOUNT_KEY = "exodiaLedger.ledgerAccount.v1";
@@ -635,7 +637,10 @@ window.applyDateRangeFilter = function () {
   const from = $("filter-from")?.value || "";
   const to = $("filter-to")?.value || "";
 
-  const mainView = localStorage.getItem(LAST_VIEW_KEY) || "coa";
+  const mainView =
+  sessionStorage.getItem(TAB_VIEW_KEY) ||
+  localStorage.getItem(LAST_VIEW_KEY) ||
+  "coa";
   const journalView = localStorage.getItem(JOURNAL_VIEW_KEY) || "entry";
 
   if (mainView === "journal" && journalView === "history") {
@@ -679,7 +684,10 @@ window.clearDateRange = function () {
   if ($("filter-from")) $("filter-from").value = "";
   if ($("filter-to")) $("filter-to").value = "";
 
-  const mainView = localStorage.getItem(LAST_VIEW_KEY) || "coa";
+  const mainView =
+  sessionStorage.getItem(TAB_VIEW_KEY) ||
+  localStorage.getItem(LAST_VIEW_KEY) ||
+  "coa";
   const journalView = localStorage.getItem(JOURNAL_VIEW_KEY) || "entry";
 
   if (mainView === "journal" && journalView === "history") {
@@ -776,6 +784,7 @@ window.showWorksheet = function (view) {
 window.show = function (view) {
   if (view === "journal-history") view = "journal";
 
+  sessionStorage.setItem(TAB_VIEW_KEY, view);
   localStorage.setItem(LAST_VIEW_KEY, view);
 
   ["coa", "journal", "ledger", "trial"].forEach((v) => {
@@ -2973,7 +2982,10 @@ async function initAppAfterLogin() {
   if ($("filter-from")) $("filter-from").value = "";
   if ($("filter-to")) $("filter-to").value = "";
 
-  const lastView = localStorage.getItem(LAST_VIEW_KEY) || "coa";
+ const lastView =
+  sessionStorage.getItem(TAB_VIEW_KEY) ||
+  localStorage.getItem(LAST_VIEW_KEY) ||
+  "coa";
   const acctFromUrl = getQueryParam("account_id");
   const savedLedgerAccount = localStorage.getItem(LEDGER_ACCOUNT_KEY) || "";
 
@@ -3248,7 +3260,10 @@ function esc(s) {
 }
 
 function loadCurrentViewDateInputs() {
-  const mainView = localStorage.getItem(LAST_VIEW_KEY) || "coa";
+  const mainView =
+  sessionStorage.getItem(TAB_VIEW_KEY) ||
+  localStorage.getItem(LAST_VIEW_KEY) ||
+  "coa";
   const journalView = localStorage.getItem(JOURNAL_VIEW_KEY) || "entry";
 
   let from = "";

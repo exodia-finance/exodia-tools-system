@@ -8,9 +8,14 @@ const FILTER_YEAR_KEY = "exodiaLedger.filterYear.v1";
 const FILTER_MONTH_KEY = "exodiaLedger.filterMonth.v1";
 const LEDGER_ACCOUNT_KEY = "exodiaLedger.ledgerAccount.v1";
 const JOURNAL_VIEW_KEY = "exodiaLedger.journalView.v1";
-const FILTER_FROM_KEY = "exodiaLedger.filterFrom.v1";
-const FILTER_TO_KEY = "exodiaLedger.filterTo.v1";
-const WORKSHEET_VIEW_KEY = "exodiaLedger.worksheetView.v1";
+const JOURNAL_FILTER_FROM_KEY = "exodiaLedger.journalFilterFrom.v1";
+const JOURNAL_FILTER_TO_KEY = "exodiaLedger.journalFilterTo.v1";
+
+const LEDGER_FILTER_FROM_KEY = "exodiaLedger.ledgerFilterFrom.v1";
+const LEDGER_FILTER_TO_KEY = "exodiaLedger.ledgerFilterTo.v1";
+
+const WORKSHEET_FILTER_FROM_KEY = "exodiaLedger.worksheetFilterFrom.v1";
+const WORKSHEET_FILTER_TO_KEY = "exodiaLedger.worksheetFilterTo.v1";
 
 // ==============================
 // Supabase Setup
@@ -39,9 +44,15 @@ let COA = [];
 let currentCOAType = "All";
 let lines = []; // loaded from Supabase (journal_lines)
 
-let filterFrom = ""; // YYYY-MM-DD
-let filterTo = "";   // YYYY-MM-DD
+let journalFilterFrom = "";
+let journalFilterTo = "";
 
+let ledgerFilterFrom = "";
+let ledgerFilterTo = "";
+
+let worksheetFilterFrom = "";
+let worksheetFilterTo = "";
+  
 // ==============================
 // AUTH UI helpers
 // ==============================
@@ -624,46 +635,88 @@ window.applyDateRangeFilter = function () {
   const from = $("filter-from")?.value || "";
   const to = $("filter-to")?.value || "";
 
-  filterFrom = from;
-  filterTo = to;
+  const mainView = localStorage.getItem(LAST_VIEW_KEY) || "coa";
+  const journalView = localStorage.getItem(JOURNAL_VIEW_KEY) || "entry";
 
-  localStorage.setItem(FILTER_FROM_KEY, from);
-  localStorage.setItem(FILTER_TO_KEY, to);
+  if (mainView === "journal" && journalView === "history") {
+    journalFilterFrom = from;
+    journalFilterTo = to;
+    localStorage.setItem(JOURNAL_FILTER_FROM_KEY, from);
+    localStorage.setItem(JOURNAL_FILTER_TO_KEY, to);
+    renderHistory();
+    return;
+  }
 
-    renderCOA();
-  renderLedger();
+  if (mainView === "ledger") {
+    ledgerFilterFrom = from;
+    ledgerFilterTo = to;
+    localStorage.setItem(LEDGER_FILTER_FROM_KEY, from);
+    localStorage.setItem(LEDGER_FILTER_TO_KEY, to);
+    renderLedger();
+    return;
+  }
 
- const wsTrial = $("ws-trial");
-const wsPL = $("ws-pl");
-const wsSFP = $("ws-sfp");
-const wsFRS = $("ws-frs");
+  if (mainView === "trial") {
+    worksheetFilterFrom = from;
+    worksheetFilterTo = to;
+    localStorage.setItem(WORKSHEET_FILTER_FROM_KEY, from);
+    localStorage.setItem(WORKSHEET_FILTER_TO_KEY, to);
 
-if (wsPL && wsPL.style.display === "block") renderProfitAndLoss();
-else if (wsSFP && wsSFP.style.display === "block") renderStatementOfFinancialPosition();
-else if (wsFRS && wsFRS.style.display === "block") renderFinancialReportSummary();
-else renderTrialBalance();
+    const wsPL = $("ws-pl");
+    const wsSFP = $("ws-sfp");
+    const wsFRS = $("ws-frs");
+
+    if (wsPL && wsPL.style.display === "block") renderProfitAndLoss();
+    else if (wsSFP && wsSFP.style.display === "block") renderStatementOfFinancialPosition();
+    else if (wsFRS && wsFRS.style.display === "block") renderFinancialReportSummary();
+    else renderTrialBalance();
+
+    return;
+  }
 };
 
 window.clearDateRange = function () {
-  filterFrom = "";
-  filterTo = "";
   if ($("filter-from")) $("filter-from").value = "";
   if ($("filter-to")) $("filter-to").value = "";
-  localStorage.removeItem(FILTER_FROM_KEY);
-  localStorage.removeItem(FILTER_TO_KEY);
 
-    renderCOA();
-  renderLedger();
+  const mainView = localStorage.getItem(LAST_VIEW_KEY) || "coa";
+  const journalView = localStorage.getItem(JOURNAL_VIEW_KEY) || "entry";
 
-  const wsTrial = $("ws-trial");
-const wsPL = $("ws-pl");
-const wsSFP = $("ws-sfp");
-const wsFRS = $("ws-frs");
+  if (mainView === "journal" && journalView === "history") {
+    journalFilterFrom = "";
+    journalFilterTo = "";
+    localStorage.removeItem(JOURNAL_FILTER_FROM_KEY);
+    localStorage.removeItem(JOURNAL_FILTER_TO_KEY);
+    renderHistory();
+    return;
+  }
 
-if (wsPL && wsPL.style.display === "block") renderProfitAndLoss();
-else if (wsSFP && wsSFP.style.display === "block") renderStatementOfFinancialPosition();
-else if (wsFRS && wsFRS.style.display === "block") renderFinancialReportSummary();
-else renderTrialBalance();
+  if (mainView === "ledger") {
+    ledgerFilterFrom = "";
+    ledgerFilterTo = "";
+    localStorage.removeItem(LEDGER_FILTER_FROM_KEY);
+    localStorage.removeItem(LEDGER_FILTER_TO_KEY);
+    renderLedger();
+    return;
+  }
+
+  if (mainView === "trial") {
+    worksheetFilterFrom = "";
+    worksheetFilterTo = "";
+    localStorage.removeItem(WORKSHEET_FILTER_FROM_KEY);
+    localStorage.removeItem(WORKSHEET_FILTER_TO_KEY);
+
+    const wsPL = $("ws-pl");
+    const wsSFP = $("ws-sfp");
+    const wsFRS = $("ws-frs");
+
+    if (wsPL && wsPL.style.display === "block") renderProfitAndLoss();
+    else if (wsSFP && wsSFP.style.display === "block") renderStatementOfFinancialPosition();
+    else if (wsFRS && wsFRS.style.display === "block") renderFinancialReportSummary();
+    else renderTrialBalance();
+
+    return;
+  }
 };
 
 // ==============================
@@ -691,6 +744,8 @@ window.showJournal = function (which) {
   }
 
   if (which === "history") renderHistory();
+
+  loadCurrentViewDateInputs();
 };
 
 window.showWorksheet = function (view) {
@@ -710,6 +765,9 @@ window.showWorksheet = function (view) {
   if (view === "pl") renderProfitAndLoss();
   if (view === "sfp") renderStatementOfFinancialPosition();
   if (view === "frs") renderFinancialReportSummary();
+
+  loadCurrentViewDateInputs();
+  
 };
 
 // ==============================
@@ -756,6 +814,8 @@ window.show = function (view) {
     const savedJournalView = localStorage.getItem(JOURNAL_VIEW_KEY) || "entry";
     showJournal(savedJournalView);
   }
+
+loadCurrentViewDateInputs();
 };
 
 // ==============================
@@ -1033,7 +1093,7 @@ function renderCOA() {
   if (!tbody) return;
 
   tbody.innerHTML = "";
-  const balances = computeBalancesAsOf(filterTo || "");
+  const balances = computeBalancesAsOf("");
 
    const totalsByType = {
     Asset: 0,
@@ -1154,8 +1214,8 @@ function renderLedger() {
     .filter((l) => (l.resolvedAccountId || l.accountId) === accountId)
     .filter((l) => {
   const d = String(l.entry_date || "");
-  if (filterFrom && d < filterFrom) return false;
-  if (filterTo && d > filterTo) return false;
+  if (ledgerFilterFrom && d < ledgerFilterFrom) return false;
+  if (ledgerFilterTo && d > ledgerFilterTo) return false;
   return true;
 })
     .sort(
@@ -1223,12 +1283,6 @@ function computeBalances() {
 
   lines
     .filter((l) => !l.is_deleted)
-    .filter((l) => {
-      const d = String(l.entry_date || "");
-      if (filterFrom && d < filterFrom) return false;
-      if (filterTo && d > filterTo) return false;
-      return true;
-    })
     .forEach((l) => {
       const key = l.resolvedAccountId || l.accountId;
       const normal = normals[key] || "Debit";
@@ -1529,7 +1583,7 @@ function renderTrialBalance() {
   tbody.innerHTML = "";
   if (status) status.textContent = "";
 
-  const balances = computeBalancesAsOf(filterTo || "");
+  const balances = computeBalancesAsOf(worksheetFilterTo || "");
 
   const typeOrder = { Asset: 1, Liability: 2, Equity: 3, Revenue: 4, Expense: 5 };
 
@@ -1597,8 +1651,8 @@ function renderProfitAndLoss() {
     .filter((l) => !l.is_deleted)
     .filter((l) => {
       const d = String(l.entry_date || "");
-      if (filterFrom && d < filterFrom) return false;
-      if (filterTo && d > filterTo) return false;
+      if (worksheetFilterFrom && d < worksheetFilterFrom) return false;
+        if (worksheetFilterTo && d > worksheetFilterTo) return false;
       return true;
     });
 
@@ -1772,7 +1826,8 @@ function renderStatementOfFinancialPosition() {
 
   tbody.innerHTML = "";
 
-  const balances = computeBalancesAsOf(filterTo || "");
+  const balances = computeBalancesAsOf(worksheetFilterTo || "");
+  const currentEarnings = computeCurrentEarningsAsOf(worksheetFilterTo || "");
 
   const assetAccounts = COA
     .filter((a) => normalizeAccountType(a.type) === "Asset")
@@ -1834,40 +1889,35 @@ function renderStatementOfFinancialPosition() {
 
   addSectionRow("Assets");
   assetAccounts.forEach((acct) => {
-  const bal = balances[acct.id] || 0;
-  totalAssets += bal;
-  addAccountRow(acct, bal);
-});
+    const bal = balances[acct.id] || 0;
+    totalAssets += bal;
+    addAccountRow(acct, bal);
+  });
   addTotalRow("Total Assets", totalAssets);
 
   addSectionRow("Liabilities");
   liabilityAccounts.forEach((acct) => {
-  const bal = balances[acct.id] || 0;
-  totalLiabilities += bal;
-  addAccountRow(acct, bal);
-});
-  
+    const bal = balances[acct.id] || 0;
+    totalLiabilities += bal;
+    addAccountRow(acct, bal);
+  });
   addTotalRow("Total Liabilities", totalLiabilities);
 
   addSectionRow("Equity");
-equityAccounts.forEach((acct) => {
-  const bal = balances[acct.id] || 0;
-  totalEquity += bal;
-  addAccountRow(acct, bal);
-});
+  equityAccounts.forEach((acct) => {
+    const bal = balances[acct.id] || 0;
+    totalEquity += bal;
+    addAccountRow(acct, bal);
+  });
 
-  // Add current period profit/loss into equity
-const currentEarnings = computeCurrentEarningsAsOf(filterTo || "");
+  addAccountRow(
+    { code: "", name: "Current Period Profit / Loss" },
+    currentEarnings
+  );
 
-addAccountRow(
-  { code: "", name: "Current Period Profit / Loss" },
-  currentEarnings
-);
+  totalEquity += currentEarnings;
 
-totalEquity += currentEarnings;
-  
   addTotalRow("Total Equity", totalEquity);
-
   addTotalRow("Total Liabilities and Equity", totalLiabilities + totalEquity);
 }
 
@@ -1968,8 +2018,8 @@ window.downloadTrialBalancePDF = function downloadTrialBalancePDF() {
   const doc = new jsPDF();
 
   const title = "Trial Balance";
-  const from = filterFrom || "";
-  const to = filterTo || "";
+  const from = worksheetFilterFrom || "";
+  const to = worksheetFilterTo || "";
 
   let subtitle = "As of current date";
 if (to) subtitle = `As of ${to}`;
@@ -1980,7 +2030,7 @@ if (to) subtitle = `As of ${to}`;
   doc.setFontSize(10);
   doc.text(subtitle, 14, 25);
   
-  const balances = computeBalancesAsOf(filterTo || "");
+  const balances = computeBalancesAsOf(worksheetFilterTo || "");
   const typeOrder = { Asset: 1, Liability: 2, Equity: 3, Revenue: 4, Expense: 5 };
 
   const list = [...COA].sort((a, b) => {
@@ -2125,21 +2175,21 @@ window.downloadProfitLossPDF = async function downloadProfitLossPDF() {
     });
   }
 
-  let subtitle = "";
-  if (filterFrom && filterTo) {
-    subtitle = `For the period from ${formatDatePretty(filterFrom)} to ${formatDatePretty(filterTo)}`;
-  } else if (filterTo) {
-    subtitle = `For the period ended ${formatDatePretty(filterTo)}`;
-  } else if (filterFrom) {
-    subtitle = `Beginning ${formatDatePretty(filterFrom)}`;
-  }
+ let subtitle = "";
+if (worksheetFilterFrom && worksheetFilterTo) {
+  subtitle = `For the period from ${formatDatePretty(worksheetFilterFrom)} to ${formatDatePretty(worksheetFilterTo)}`;
+} else if (worksheetFilterTo) {
+  subtitle = `For the period ended ${formatDatePretty(worksheetFilterTo)}`;
+} else if (worksheetFilterFrom) {
+  subtitle = `Beginning ${formatDatePretty(worksheetFilterFrom)}`;
+}
 
-  const filteredLines = lines
+    const filteredLines = lines
     .filter((l) => !l.is_deleted)
     .filter((l) => {
       const d = String(l.entry_date || "");
-      if (filterFrom && d < filterFrom) return false;
-      if (filterTo && d > filterTo) return false;
+      if (worksheetFilterFrom && d < worksheetFilterFrom) return false;
+      if (worksheetFilterTo && d > worksheetFilterTo) return false;
       return true;
     });
 
@@ -2461,18 +2511,18 @@ window.downloadStatementOfFinancialPositionPDF = async function downloadStatemen
     });
   }
 
-  let subtitle = "";
-  if (filterFrom && filterTo) {
-    subtitle = `As of ${formatDatePretty(filterTo)}`;
-  } else if (filterTo) {
-    subtitle = `As of ${formatDatePretty(filterTo)}`;
-  } else if (filterFrom) {
-    subtitle = `From ${formatDatePretty(filterFrom)}`;
-  } else {
-    subtitle = "As of current filtered balances";
-  }
-
-  const balances = computeBalancesAsOf(filterTo || "");
+ let subtitle = "";
+if (worksheetFilterFrom && worksheetFilterTo) {
+  subtitle = `As of ${formatDatePretty(worksheetFilterTo)}`;
+} else if (worksheetFilterTo) {
+  subtitle = `As of ${formatDatePretty(worksheetFilterTo)}`;
+} else if (worksheetFilterFrom) {
+  subtitle = `From ${formatDatePretty(worksheetFilterFrom)}`;
+} else {
+  subtitle = "As of current filtered balances";
+}
+  
+  const balances = computeBalancesAsOf(worksheetFilterTo || "");
 
   const assetAccounts = COA
     .filter((a) => normalizeAccountType(a.type) === "Asset")
@@ -2593,7 +2643,7 @@ window.downloadStatementOfFinancialPositionPDF = async function downloadStatemen
   ]);
 });
 
-const currentEarnings = computeCurrentEarningsAsOf(filterTo || "");
+const currentEarnings = computeCurrentEarningsAsOf(worksheetFilterTo || "");
 
 bodyRows.push([
   "",
@@ -2911,16 +2961,17 @@ async function initAppAfterLogin() {
   const ledgerSel = $("ledger-account");
   if (ledgerSel) ledgerSel.innerHTML = "";
 
-  const savedFrom = localStorage.getItem(FILTER_FROM_KEY) || "";
-  const savedTo = localStorage.getItem(FILTER_TO_KEY) || "";
+  journalFilterFrom = localStorage.getItem(JOURNAL_FILTER_FROM_KEY) || "";
+  journalFilterTo = localStorage.getItem(JOURNAL_FILTER_TO_KEY) || "";
 
-  filterFrom = savedFrom;
-  filterTo = savedTo;
+  ledgerFilterFrom = localStorage.getItem(LEDGER_FILTER_FROM_KEY) || "";
+  ledgerFilterTo = localStorage.getItem(LEDGER_FILTER_TO_KEY) || "";
 
-  if ($("filter-from")) $("filter-from").value = savedFrom;
-  if ($("filter-to")) $("filter-to").value = savedTo;
+  worksheetFilterFrom = localStorage.getItem(WORKSHEET_FILTER_FROM_KEY) || "";
+  worksheetFilterTo = localStorage.getItem(WORKSHEET_FILTER_TO_KEY) || "";
 
-  applyDateRangeFilter();
+  if ($("filter-from")) $("filter-from").value = "";
+  if ($("filter-to")) $("filter-to").value = "";
 
   const lastView = localStorage.getItem(LAST_VIEW_KEY) || "coa";
   const acctFromUrl = getQueryParam("account_id");
@@ -2974,23 +3025,35 @@ function renderHistory() {
 
       if (status) status.textContent = "";
 
-      entries.forEach((e) => {
-        const tr = document.createElement("tr");
-        tr.innerHTML = `
-  <td>${esc(e.entry_date || "")}</td>
-  <td>${esc(formatDateTime(e.created_at))}</td>
-  <td>${esc(e.ref || "")}</td>
-  <td>${esc(e.description || "")}</td>
-  <td>${esc(e.department || "")}</td>
-  <td>${esc(e.payment_method || "")}</td>
-  <td>${esc(e.client_vendor || "")}</td>
-  <td>${esc(e.remarks || "")}</td>
-  <td>
-    <button class="btn" onclick="viewHistoryEntry('${e.id}')">View</button>
-  </td>
-`;
-        tbody.appendChild(tr);
-      });
+      const filteredEntries = entries.filter((e) => {
+  const d = String(e.entry_date || "");
+  if (journalFilterFrom && d < journalFilterFrom) return false;
+  if (journalFilterTo && d > journalFilterTo) return false;
+  return true;
+});
+
+if (filteredEntries.length === 0) {
+  if (status) status.textContent = "No journal entries found for this filter.";
+  return;
+}
+
+filteredEntries.forEach((e) => {
+  const tr = document.createElement("tr");
+  tr.innerHTML = `
+    <td>${esc(e.entry_date || "")}</td>
+    <td>${esc(formatDateTime(e.created_at))}</td>
+    <td>${esc(e.ref || "")}</td>
+    <td>${esc(e.description || "")}</td>
+    <td>${esc(e.department || "")}</td>
+    <td>${esc(e.payment_method || "")}</td>
+    <td>${esc(e.client_vendor || "")}</td>
+    <td>${esc(e.remarks || "")}</td>
+    <td>
+      <button class="btn" onclick="viewHistoryEntry('${e.id}')">View</button>
+    </td>
+  `;
+  tbody.appendChild(tr);
+});
     })
     .catch((err) => {
       console.error("renderHistory error:", err);
@@ -3182,6 +3245,28 @@ function esc(s) {
     .replaceAll(">", "&gt;")
     .replaceAll('"', "&quot;")
     .replaceAll("'", "&#039;");
+}
+
+function loadCurrentViewDateInputs() {
+  const mainView = localStorage.getItem(LAST_VIEW_KEY) || "coa";
+  const journalView = localStorage.getItem(JOURNAL_VIEW_KEY) || "entry";
+
+  let from = "";
+  let to = "";
+
+  if (mainView === "journal" && journalView === "history") {
+    from = journalFilterFrom;
+    to = journalFilterTo;
+  } else if (mainView === "ledger") {
+    from = ledgerFilterFrom;
+    to = ledgerFilterTo;
+  } else if (mainView === "trial") {
+    from = worksheetFilterFrom;
+    to = worksheetFilterTo;
+  }
+
+  if ($("filter-from")) $("filter-from").value = from || "";
+  if ($("filter-to")) $("filter-to").value = to || "";
 }
 
 window.togglePLDetail = function (className, btn) {

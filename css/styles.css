@@ -162,114 +162,6 @@ body{
   margin-top:8px;
 }
 
-    /* =========================
-   GENERAL LEDGER STYLING
-========================= */
-#ledger {
-  max-width: 1180px;
-}
-
-#ledger h2 {
-  font-size: 32px;
-  font-weight: 700;
-  margin-bottom: 14px;
-}
-
-#ledger label,
-#ledger select,
-#ledger input,
-#ledger table,
-#ledger th,
-#ledger td {
-  font-family: Arial, sans-serif;
-}
-
-#ledger-search {
-  width: 360px !important;
-  padding: 10px 12px !important;
-  font-size: 15px !important;
-  border: 1px solid #cfcfcf;
-  border-radius: 8px;
-  box-sizing: border-box;
-}
-
-#ledger-account {
-  margin-top: 10px;
-  margin-bottom: 14px;
-  width: 420px;
-  max-width: 100%;
-  padding: 10px 12px;
-  font-size: 15px;
-  border: 1px solid #cfcfcf;
-  border-radius: 8px;
-  background: #fff;
-}
-
-#ledger table {
-  width: 100%;
-  border-collapse: collapse;
-  background: #fff;
-  border: 1px solid #d8d8d8;
-  border-radius: 10px;
-  overflow: hidden;
-}
-
-#ledger thead th {
-  background: #f3f4f6;
-  font-size: 15px;
-  font-weight: 700;
-  text-align: center;
-  padding: 12px 10px;
-  border: 1px solid #d8d8d8;
-  white-space: nowrap;
-}
-
-#ledger tbody td {
-  font-size: 14px;
-  padding: 10px 10px;
-  border: 1px solid #e1e1e1;
-  vertical-align: middle;
-}
-
-#ledger tbody tr:nth-child(even) {
-  background: #fafafa;
-}
-
-#ledger tbody tr:hover {
-  background: #f4f8ff;
-}
-
-#ledger tbody td:nth-child(8),
-#ledger tbody td:nth-child(9),
-#ledger tbody td:nth-child(10),
-#ledger tbody td:nth-child(11) {
-  text-align: right;
-  white-space: nowrap;
-}
-
-#ledger tbody td:nth-child(8) {
-  text-align: center;
-}
-
-#ledger a {
-  color: #2f5bd3;
-  font-weight: 600;
-  text-decoration: none;
-}
-
-#ledger a:hover {
-  text-decoration: underline;
-}
-
-#ledger .muted {
-  color: #777;
-  font-size: 13px;
-}
-
-#ledger-search::placeholder {
-  color: #8a8a8a;
-}
-
 /* =========================
    JOURNAL ENTRY PROFESSIONAL STYLE
 ========================= */
@@ -1042,112 +934,6 @@ textarea:required:invalid{
   background:#fff7f7;
 }
 
-/* =========================
-JOURNAL HISTORY - FIT WITHOUT SIDE SCROLL
-========================= */
-
-#journal-history{
-  padding: 20px;
-  width: 100%;
-  max-width: 1350px;
-  margin: auto;
-}
-
-#journal-history h2{
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: 34px;
-  font-weight: 700;
-  margin: 6px 0 18px;
-  color: #181818;
-  letter-spacing: -0.4px;
-}
-
-#journal-history table{
-  width: 100%;
-  table-layout: fixed;
-  border-collapse: collapse;
-  background: #ffffff;
-  border: 1px solid #f0ddd0;
-  border-radius: 16px;
-  overflow: hidden;
-  box-shadow: 0 10px 24px rgba(0,0,0,0.06);
-}
-
-#journal-history thead th{
-  background: linear-gradient(180deg, #1c1c1f 0%, #111214 100%);
-  color: #ffffff;
-  font-size: 13px;
-  font-weight: 800;
-  text-align: center;
-  padding: 12px 8px;
-  border-bottom: 2px solid #ff7a1a;
-  white-space: normal;
-  word-break: break-word;
-  overflow-wrap: anywhere;
-  line-height: 1.25;
-}
-
-#journal-history tbody td{
-  font-size: 13px;
-  color: #222;
-  padding: 12px 8px;
-  border-bottom: 1px solid #f3e2d5;
-  vertical-align: top;
-  line-height: 1.4;
-  background: #fff;
-  white-space: normal;
-  word-break: break-word;
-  overflow-wrap: anywhere;
-}
-
-#journal-history tbody tr:nth-child(even) td{
-  background: #fffaf6;
-}
-
-#journal-history tbody tr:hover td{
-  background: #fff1e6;
-}
-
-#journal-history thead th:nth-child(1),
-#journal-history thead th:nth-child(2),
-#journal-history thead th:nth-child(3),
-#journal-history tbody td:nth-child(1),
-#journal-history tbody td:nth-child(2),
-#journal-history tbody td:nth-child(3){
-  font-size: 12px;
-}
-
-#journal-history thead th:last-child,
-#journal-history tbody td:last-child{
-  width: 72px;
-  text-align: center;
-  vertical-align: middle;
-}
-
-#journal-history button{
-  padding: 7px 12px;
-  border: 1px solid #f0c3a1;
-  background: #fff4eb;
-  color: #8a420c;
-  border-radius: 10px;
-  cursor: pointer;
-  font-weight: 700;
-  font-size: 13px;
-  transition: all 0.18s ease;
-}
-
-#journal-history button:hover{
-  background: #ff6a00;
-  border-color: #ff6a00;
-  color: #fff;
-}
-
-#history-status{
-  margin-top: 12px;
-  font-size: 14px;
-  font-weight: 600;
-  color: #555;
-}
 
 /* =========================
 JOURNAL HISTORY - FIT WITHOUT SIDE SCROLL
@@ -1323,9 +1109,9 @@ GENERAL LEDGER - PREMIUM CLEAN
   box-shadow: 0 0 0 4px rgba(255, 106, 0, 0.08);
 }
 
-/* Ledger table */
 #ledger table{
   width: 100%;
+  table-layout: fixed;
   border-collapse: collapse;
   background: #ffffff;
   border: 1px solid #f0ddd0;
@@ -1347,15 +1133,32 @@ GENERAL LEDGER - PREMIUM CLEAN
   line-height: 1.25;
 }
 
+#ledger thead th:nth-child(1){ width: 90px; }
+#ledger thead th:nth-child(2){ width: 110px; }
+#ledger thead th:nth-child(4){ width: 90px; }
+#ledger thead th:nth-child(5){ width: 90px; }
+#ledger thead th:nth-child(8){ width: 110px; }
+#ledger thead th:nth-child(9),
+#ledger thead th:nth-child(10),
+#ledger thead th:nth-child(11){ width: 95px; }
+
 /* Body cells */
 #ledger tbody td{
   font-size: 13px;
   color: #222;
-  padding: 12px 10px;
+  padding: 10px 8px;
   border-bottom: 1px solid #f3e2d5;
   vertical-align: top;
-  line-height: 1.4;
+  line-height: 1.35;
   background: #fff;
+  white-space: normal;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+
+#ledger th,
+#ledger td{
+  white-space: normal;
   word-break: break-word;
   overflow-wrap: anywhere;
 }
@@ -1422,17 +1225,8 @@ GENERAL LEDGER - PREMIUM CLEAN
   padding: 18px;
 }
 
-#ledger thead th:nth-child(8),
-#ledger tbody td:nth-child(8){
-  position: sticky;
-  right: 0;
-  background: #fff;
-  z-index: 2;
-}
-
-/* header fix */
-#ledger thead th:nth-child(8){
-  background: #111214;
+#ledger{
+  overflow-x: hidden;
 }
 
 

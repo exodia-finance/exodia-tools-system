@@ -1190,9 +1190,9 @@ function renderLedger() {
     sel.innerHTML = "";
 
     const o0 = document.createElement("option");
-o0.value = "";
-o0.textContent = "Please select an account to view the ledger";
-sel.appendChild(o0);
+    o0.value = "";
+    o0.textContent = "Please select an account to view the ledger";
+    sel.appendChild(o0);
 
     const sorted = [...COA].sort((a, b) => {
       const ca = codeNum(a.code);
@@ -1210,37 +1210,34 @@ sel.appendChild(o0);
 
     const savedAcct = localStorage.getItem(LEDGER_ACCOUNT_KEY) || "";
 
-if (savedAcct) {
-  if (!COA_BY_ID[savedAcct] && COA_BY_CODE[savedAcct]?.id) {
-    sel.value = String(COA_BY_CODE[savedAcct].id);
-  } else if ([...sel.options].some((o) => o.value === savedAcct)) {
-    sel.value = savedAcct;
-  } else {
-    sel.value = "";
-  }
-} else {
-  sel.value = "";
-}
+    if (savedAcct) {
+      if (!COA_BY_ID[savedAcct] && COA_BY_CODE[savedAcct]?.id) {
+        sel.value = String(COA_BY_CODE[savedAcct].id);
+      } else if ([...sel.options].some((o) => o.value === savedAcct)) {
+        sel.value = savedAcct;
+      } else {
+        sel.value = "";
+      }
+    } else {
+      sel.value = "";
+    }
   }
 
   tbody.innerHTML = "";
 
-const accountId = String(sel.value || "").trim();
-localStorage.setItem(LEDGER_ACCOUNT_KEY, accountId);
+  const accountId = String(sel.value || "").trim();
+  localStorage.setItem(LEDGER_ACCOUNT_KEY, accountId);
 
-if (!accountId) {
-  const tr = document.createElement("tr");
-
-  const td = document.createElement("td");
-  td.colSpan = 11;
-  td.style.textAlign = "center";
-  td.style.padding = "20px";
-  td.textContent = "Please select an account to view the ledger.";
-
-  tr.appendChild(td);
-  tbody.appendChild(tr);
-  return;
-}
+  if (!accountId) {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td colspan="11" style="text-align:center; padding:20px;">
+        Please select an account to view the ledger.
+      </td>
+    `;
+    tbody.appendChild(tr);
+    return;
+  }
 
   const acct = COA.find((a) => a.id === accountId);
   const normal = acct?.normal || "Debit";
@@ -1249,11 +1246,11 @@ if (!accountId) {
     .filter((l) => !l.is_deleted)
     .filter((l) => (l.resolvedAccountId || l.accountId) === accountId)
     .filter((l) => {
-  const d = String(l.entry_date || "");
-  if (ledgerFilterFrom && d < ledgerFilterFrom) return false;
-  if (ledgerFilterTo && d > ledgerFilterTo) return false;
-  return true;
-})
+      const d = String(l.entry_date || "");
+      if (ledgerFilterFrom && d < ledgerFilterFrom) return false;
+      if (ledgerFilterTo && d > ledgerFilterTo) return false;
+      return true;
+    })
     .sort(
       (a, b) =>
         String(a.entry_date || "").localeCompare(String(b.entry_date || "")) ||
@@ -1273,46 +1270,45 @@ if (!accountId) {
     const tr = document.createElement("tr");
     const canEdit = !!l.journal_id;
 
-tr.innerHTML = `
-  <td>${esc(l.entry_date)}</td>
-  <td>${esc(l.ref)}</td>
-  <td>${esc(l.description || "")}</td>
-  <td>${esc(l.department || "")}</td>
-  <td>${esc(l.payment_method || "")}</td>
-  <td>${esc(l.client_vendor || "")}</td>
-  <td>${esc(l.remarks || "")}</td>
-  <td>
-    ${
-      canEdit
-        ? `<a href="./edit.html?journal_id=${encodeURIComponent(
-            l.journal_id
-          )}&account_id=${encodeURIComponent(accountId)}">Edit / Delete</a>`
-        : `<span class="muted">N/A</span>`
-    }
-  </td>
-  <td style="text-align:right;">${money(l.debit)}</td>
-  <td style="text-align:right;">${money(l.credit)}</td>
-  <td style="text-align:right;">${money(running)}</td>
-`;
+    tr.innerHTML = `
+      <td>${esc(l.entry_date)}</td>
+      <td>${esc(l.ref)}</td>
+      <td>${esc(l.description || "")}</td>
+      <td>${esc(l.department || "")}</td>
+      <td>${esc(l.payment_method || "")}</td>
+      <td>${esc(l.client_vendor || "")}</td>
+      <td>${esc(l.remarks || "")}</td>
+      <td style="text-align:right;">${money(l.debit)}</td>
+      <td style="text-align:right;">${money(l.credit)}</td>
+      <td style="text-align:right;">${money(running)}</td>
+      <td>
+        ${
+          canEdit
+            ? `<a href="./edit.html?journal_id=${encodeURIComponent(
+                l.journal_id
+              )}&account_id=${encodeURIComponent(accountId)}">Edit / Delete</a>`
+            : `<span class="muted">N/A</span>`
+        }
+      </td>
+    `;
 
     tbody.appendChild(tr);
   });
 
-if (acctLines.length === 0) {
-  const tr = document.createElement("tr");
+  if (acctLines.length === 0) {
+    const hasDateFilter = !!(ledgerFilterFrom || ledgerFilterTo);
+    const emptyMessage = hasDateFilter
+      ? "No transactions found for the selected account within the specified date range."
+      : "No transactions found for the selected account.";
 
-  const hasDateFilter = !!(ledgerFilterFrom || ledgerFilterTo);
-  const emptyMessage = hasDateFilter
-    ? "No transactions found for the selected account within the specified date range."
-    : "No transactions found for the selected account.";
-
-  tr.innerHTML = `
-    <td colspan="11" style="text-align:center; padding:20px;">
-      ${emptyMessage}
-    </td>
-  `;
-  tbody.appendChild(tr);
-}
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td colspan="11" style="text-align:center; padding:20px;">
+        ${emptyMessage}
+      </td>
+    `;
+    tbody.appendChild(tr);
+  }
 }
 
 // ==============================

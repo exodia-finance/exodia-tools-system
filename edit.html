@@ -5,90 +5,319 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Edit Journal Entry</title>
 
-  <!-- Supabase JS (same as your index.html uses) -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <style>
-    body { font-family: Arial, sans-serif; margin: 16px; }
-    .row { display: grid; grid-template-columns: 220px 1fr; gap: 10px; max-width: 900px; }
-    label { display: grid; gap: 6px; margin-bottom: 10px; }
-    input, select, textarea { padding: 10px; font-size: 16px; width: 100%; box-sizing: border-box; }
-    textarea { min-height: 90px; resize: vertical; }
-    table { border-collapse: collapse; width: 900px; max-width: 100%; margin-top: 10px; }
-    th, td { border: 1px solid #999; padding: 8px; }
-    th { background: #f3f3f3; }
-    .right { text-align: right; }
-    .btns { display: flex; gap: 10px; margin-top: 12px; flex-wrap: wrap; }
-    button { padding: 10px 14px; cursor: pointer; }
-    .danger { background: #b00020; color: white; border: none; }
-    .muted { color: #666; }
-    .status { margin-top: 10px; font-weight: bold; }
+    *{
+      box-sizing: border-box;
+    }
+
+    body{
+      margin: 0;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      background: #f5f6f8;
+      color: #222;
+    }
+
+    .edit-page{
+      max-width: 1280px;
+      margin: 0 auto;
+      padding: 28px 20px 40px;
+    }
+
+    .edit-title{
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: 42px;
+      font-weight: 700;
+      margin: 8px 0 22px;
+      color: #181818;
+      letter-spacing: -0.5px;
+    }
+
+    .edit-card{
+      background: linear-gradient(180deg, #ffffff 0%, #fffdfa 100%);
+      border: 1px solid #f0ddd0;
+      border-radius: 18px;
+      box-shadow: 0 12px 28px rgba(0,0,0,0.06);
+      padding: 28px 32px;
+    }
+
+    .section-title{
+      font-size: 20px;
+      font-weight: 800;
+      margin: 0 0 16px;
+      color: #2b2b2b;
+    }
+
+    .row{
+      display: grid;
+      grid-template-columns: 220px 1fr;
+      gap: 14px;
+      max-width: 100%;
+    }
+
+    label{
+      display: grid;
+      gap: 7px;
+      margin-bottom: 10px;
+      font-size: 15px;
+      font-weight: 600;
+      color: #2b2b2b;
+    }
+
+    .required{
+      color: #d60000;
+      font-weight: 800;
+      margin-left: 4px;
+    }
+
+    input,
+    select,
+    textarea{
+      width: 100%;
+      padding: 13px 14px;
+      font-size: 15px;
+      border: 1px solid #e7cdb8;
+      border-radius: 10px;
+      background: #fff;
+      transition: all 0.18s ease;
+    }
+
+    input:focus,
+    select:focus,
+    textarea:focus{
+      outline: none;
+      border-color: #ff8a3d;
+      box-shadow: 0 0 0 4px rgba(255, 106, 0, 0.10);
+    }
+
+    textarea{
+      min-height: 100px;
+      resize: vertical;
+    }
+
+    .lines-wrap{
+      margin-top: 24px;
+    }
+
+    .lines-table{
+      width: 100%;
+      border-collapse: collapse;
+      table-layout: fixed;
+      background: #fff;
+      border: 1px solid #f0ddd0;
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow: 0 8px 18px rgba(0,0,0,0.08);
+    }
+
+    .lines-table th{
+      background: linear-gradient(180deg, #1c1c1f 0%, #111214 100%);
+      color: #ffffff;
+      font-weight: 800;
+      font-size: 15px;
+      padding: 14px 12px;
+      text-align: center;
+      border-bottom: 2px solid #ff7a1a;
+    }
+
+    .lines-table td{
+      border-bottom: 1px solid #f3e3d7;
+      padding: 10px 8px;
+      vertical-align: middle;
+      background: #fff;
+    }
+
+    .lines-table tr:nth-child(even) td{
+      background: #fffaf6;
+    }
+
+    .lines-table input,
+    .lines-table select{
+      width: 100%;
+      padding: 11px 12px;
+      border: 1px solid #e4ccb7;
+      border-radius: 10px;
+      font-size: 15px;
+      background: #fff;
+    }
+
+    .lines-table input:focus,
+    .lines-table select:focus{
+      outline: none;
+      border-color: #ff8a3d;
+      box-shadow: 0 0 0 4px rgba(255, 106, 0, 0.08);
+    }
+
+    .right{
+      text-align: right;
+    }
+
+    .btns{
+      display: flex;
+      gap: 10px;
+      margin-top: 16px;
+      flex-wrap: wrap;
+    }
+
+    button{
+      padding: 10px 16px;
+      border-radius: 12px;
+      cursor: pointer;
+      font-weight: 700;
+      font-size: 14px;
+      transition: all 0.18s ease;
+    }
+
+    #btn-add,
+    #btn-back{
+      border: 1px solid #f0c3a1;
+      background: #fff4eb;
+      color: #8a420c;
+    }
+
+    #btn-add:hover,
+    #btn-back:hover{
+      background: #ff6a00;
+      color: #fff;
+      border-color: #ff6a00;
+    }
+
+    #btn-save{
+      border: 1px solid #222;
+      background: #222;
+      color: #fff;
+      font-weight: 800;
+    }
+
+    #btn-save:hover{
+      background: #111;
+    }
+
+    #btn-delete{
+      border: 1px solid #c23b00;
+      background: #fff1ea;
+      color: #c23b00;
+    }
+
+    #btn-delete:hover{
+      background: #c23b00;
+      color: #fff;
+    }
+
+    .status{
+      margin-top: 14px;
+      padding: 12px 14px;
+      border-radius: 12px;
+      background: #fff8f1;
+      border: 1px solid #f3d3bc;
+      color: #9a3412;
+      font-size: 14px;
+      font-weight: 700;
+      line-height: 1.4;
+      display: inline-block;
+      min-width: 280px;
+    }
+
+    .status:empty{
+      display: none;
+    }
+
+    @media (max-width: 900px){
+      .edit-page{
+        padding: 20px 14px 30px;
+      }
+
+      .edit-card{
+        padding: 20px 18px;
+      }
+
+      .edit-title{
+        font-size: 34px;
+      }
+
+      .row{
+        grid-template-columns: 1fr;
+      }
+
+      .span-2{
+        grid-column: auto !important;
+      }
+    }
   </style>
 </head>
 
 <body>
-  <h2>Edit Journal Entry</h2>
+  <div class="edit-page">
+    <h1 class="edit-title">Edit Journal Entry</h1>
 
-  <div class="row">
-    <label>
-      Date <span style="color:crimson">*</span>
-      <input type="date" id="e-date" />
-    </label>
+    <div class="edit-card">
+      <div class="section-title">Entry Information</div>
 
-    <label>
-      Reference No. <span style="color:crimson">*</span>
-      <input type="text" id="e-ref" />
-    </label>
+      <div class="row">
+        <label>
+          Date <span class="required">*</span>
+          <input type="date" id="e-date" />
+        </label>
 
-    <label style="grid-column:1 / span 2;">
-      Description <span style="color:crimson">*</span>
-      <input type="text" id="e-desc" />
-    </label>
+        <label>
+          Reference No. <span class="required">*</span>
+          <input type="text" id="e-ref" />
+        </label>
 
-    <label>
-      Department / Cost Center
-      <input type="text" id="e-dept" />
-    </label>
+        <label class="span-2" style="grid-column:1 / span 2;">
+          Description <span class="required">*</span>
+          <input type="text" id="e-desc" />
+        </label>
 
-    <label>
-      Payment Method
-      <input type="text" id="e-pay" />
-    </label>
+        <label>
+          Department / Cost Center
+          <input type="text" id="e-dept" />
+        </label>
 
-    <label>
-      Client / Vendor
-      <input type="text" id="e-client" />
-    </label>
+        <label>
+          Payment Method
+          <input type="text" id="e-pay" />
+        </label>
 
-    <label style="grid-column:1 / span 2;">
-      Remarks
-      <textarea id="e-remarks"></textarea>
-    </label>
+        <label>
+          Client / Vendor
+          <input type="text" id="e-client" />
+        </label>
+
+        <label class="span-2" style="grid-column:1 / span 2;">
+          Remarks
+          <textarea id="e-remarks"></textarea>
+        </label>
+      </div>
+
+      <div class="lines-wrap">
+        <div class="section-title">Lines</div>
+
+        <table class="lines-table">
+          <thead>
+            <tr>
+              <th style="width:55%;">Account</th>
+              <th style="width:20%;">Debit</th>
+              <th style="width:20%;">Credit</th>
+              <th style="width:5%;">X</th>
+            </tr>
+          </thead>
+          <tbody id="e-lines"></tbody>
+        </table>
+      </div>
+
+      <div class="btns">
+        <button type="button" id="btn-add">Add Line</button>
+        <button type="button" id="btn-save">Save Changes</button>
+        <button type="button" id="btn-delete">Delete Entry</button>
+        <button type="button" id="btn-back">Back to Ledger</button>
+      </div>
+
+      <div class="status" id="status"></div>
+    </div>
   </div>
-
-  <h3>Lines</h3>
-  <table>
-    <thead>
-      <tr>
-        <th style="width: 55%;">Account</th>
-        <th style="width: 20%;">Debit</th>
-        <th style="width: 20%;">Credit</th>
-        <th style="width: 5%;">X</th>
-      </tr>
-    </thead>
-    <tbody id="e-lines"></tbody>
-  </table>
-
-  <div class="btns">
-  <button type="button" id="btn-add">Add Line</button>
-  <button type="button" id="btn-save">Save Changes</button>
-  <button type="button" id="btn-delete" class="danger">Delete Entry</button>
-  <button type="button" id="btn-back">Back to Ledger</button>
-</div>
-
-  <div class="status" id="status"></div>
 
   <script src="./edit.js"></script>
 </body>
 </html>
-

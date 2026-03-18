@@ -1178,6 +1178,20 @@ GENERAL LEDGER - PREMIUM CLEAN
   overflow-wrap: anywhere;
 }
 
+#ledger tbody td:nth-child(9),
+#ledger tbody td:nth-child(10),
+#ledger tbody td:nth-child(11){
+  white-space: nowrap;
+  word-break: normal;
+  overflow-wrap: normal;
+}
+
+#ledger thead th:nth-child(9),
+#ledger thead th:nth-child(10),
+#ledger thead th:nth-child(11){
+  white-space: nowrap;
+}
+
 #ledger tbody tr:nth-child(even) td{
   background: #fffaf6;
 }

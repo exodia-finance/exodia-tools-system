@@ -48,16 +48,19 @@
         <div class="profile-greeting" id="profile-greeting">Hi!</div>
       </div>
 
-      <div class="profile-menu-actions">
-        <button type="button" class="profile-menu-item" onclick="goToManageUsers()">
-          User Access
-        </button>
+  <div class="profile-menu-actions">
+  <button type="button" class="profile-menu-item" onclick="goToCreateUser()">
+    Create User
+  </button>
 
-        <button type="button" class="profile-menu-item logout-btn" onclick="signOut()">
-          Logout
-        </button>
-      </div>
-    </div>
+  <button type="button" class="profile-menu-item" onclick="goToManageUserAccess()">
+    Manage User Access
+  </button>
+
+  <button type="button" class="profile-menu-item logout-btn" onclick="signOut()">
+    Logout
+  </button>
+</div>
 
     <span id="auth-msg-in" style="display:none;"></span>
   </div>

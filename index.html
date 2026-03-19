@@ -16,50 +16,51 @@
     <input id="auth-pass" type="password" placeholder="Password">
     <button id="auth-toggle-pass" type="button">👁</button>
     <button id="auth-login-btn" onclick="signIn()" disabled>Login</button>
-   <span id="auth-msg"></span>
+    <span id="auth-msg"></span>
   </div>
 
- <div id="auth-logged-in" class="profile-wrap" style="display:none;">
-  <button id="profile-btn" type="button" class="profile-btn" onclick="toggleProfileMenu(event)">
-    <img
-      id="profile-avatar"
-      class="profile-avatar"
-      src="https://ui-avatars.com/api/?name=User&background=ff8a00&color=fff"
-      alt="Profile"
-    >
-  </button>
-
- <div id="profile-menu" class="profile-menu" style="display:none;">
-  <button type="button" class="profile-close" onclick="closeProfileMenu()">✕</button>
-
-  <div class="profile-menu-top-email" id="profile-email-top"></div>
-  <div class="profile-menu-managed">Managed by exodiagamedev.com</div>
-
-  <div class="profile-menu-center">
-    <div class="profile-big-avatar-wrap">
+  <div id="auth-logged-in" class="profile-wrap" style="display:none;">
+    <button id="profile-btn" type="button" class="profile-btn" onclick="toggleProfileMenu(event)">
       <img
-        id="profile-avatar-large"
-        class="profile-avatar-large"
+        id="profile-avatar"
+        class="profile-avatar"
         src="https://ui-avatars.com/api/?name=User&background=ff8a00&color=fff"
         alt="Profile"
       >
+    </button>
+
+    <div id="profile-menu" class="profile-menu" style="display:none;">
+      <button type="button" class="profile-close" onclick="closeProfileMenu()">✕</button>
+
+      <div class="profile-menu-top-email" id="profile-email-top"></div>
+      <div class="profile-menu-managed">Managed by exodiagamedev.com</div>
+
+      <div class="profile-menu-center">
+        <div class="profile-big-avatar-wrap">
+          <img
+            id="profile-avatar-large"
+            class="profile-avatar-large"
+            src="https://ui-avatars.com/api/?name=User&background=ff8a00&color=fff"
+            alt="Profile"
+          >
+        </div>
+
+        <div class="profile-greeting" id="profile-greeting">Hi!</div>
+      </div>
+
+      <div class="profile-menu-actions">
+        <button type="button" class="profile-menu-item" onclick="goToManageUsers()">
+          Manage Accounts
+        </button>
+
+        <button type="button" class="profile-menu-item logout-btn" onclick="signOut()">
+          Logout
+        </button>
+      </div>
     </div>
 
-    <div class="profile-greeting" id="profile-greeting">Hi!</div>
+    <span id="auth-msg-in" style="display:none;"></span>
   </div>
-
-  <div class="profile-menu-actions">
-  <button type="button" class="profile-menu-item" onclick="goToManageUsers()">
-    Manage Accounts
-  </button>
-
-  <button type="button" class="profile-menu-item logout-btn" onclick="signOut()">
-    Logout
-  </button>
-</div>
-
-  <span id="auth-msg-in" style="display:none;"></span>
-</div>
 </div>
 
 <!-- ========================= APP ========================= -->

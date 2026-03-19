@@ -64,23 +64,32 @@ function setUI(isLoggedIn, email = "") {
   const outBox = $("auth-logged-out");
   const inBox = $("auth-logged-in");
   const userEl = $("auth-user");
+  const topEmailEl = $("profile-email-top");
+  const greetingEl = $("profile-greeting");
   const avatarEl = $("profile-avatar");
+  const avatarLargeEl = $("profile-avatar-large");
 
   if (isLoggedIn) {
     if (app) app.style.display = "block";
     if (outBox) outBox.style.display = "none";
     if (inBox) inBox.style.display = "inline-flex";
     if (userEl) userEl.textContent = email || "";
+    if (topEmailEl) topEmailEl.textContent = email || "";
 
-    if (avatarEl) {
-      const safeName = encodeURIComponent(email || "User");
-      avatarEl.src = `https://ui-avatars.com/api/?name=${safeName}&background=ff8a00&color=fff`;
-    }
+   const displayName = (email || "User").split("@")[0];
+   if (greetingEl) greetingEl.textContent = `Hi, ${displayName}!`;
+
+   const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(email || "User")}&background=ff8a00&color=fff`;
+
+   if (avatarEl) avatarEl.src = avatarUrl;
+   if (avatarLargeEl) avatarLargeEl.src = avatarUrl;
   } else {
     if (app) app.style.display = "none";
     if (outBox) outBox.style.display = "block";
     if (inBox) inBox.style.display = "none";
     if (userEl) userEl.textContent = "";
+    if (topEmailEl) topEmailEl.textContent = "";
+    if (greetingEl) greetingEl.textContent = "Hi!";
     closeProfileMenu();
   }
 }

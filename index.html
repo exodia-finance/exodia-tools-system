@@ -29,16 +29,31 @@
     >
   </button>
 
-  <div id="profile-menu" class="profile-menu" style="display:none;">
-    <div class="profile-menu-head">
-      <div class="profile-menu-name" id="auth-user"></div>
-      <div class="profile-menu-sub">Account</div>
+ <div id="profile-menu" class="profile-menu" style="display:none;">
+  <button type="button" class="profile-close" onclick="closeProfileMenu()">✕</button>
+
+  <div class="profile-menu-top-email" id="profile-email-top"></div>
+  <div class="profile-menu-managed">Managed by exodiagamedev.com</div>
+
+  <div class="profile-menu-center">
+    <div class="profile-big-avatar-wrap">
+      <img
+        id="profile-avatar-large"
+        class="profile-avatar-large"
+        src="https://ui-avatars.com/api/?name=User&background=ff8a00&color=fff"
+        alt="Profile"
+      >
     </div>
 
-    <button type="button" class="profile-menu-item" onclick="signOut()">
+    <div class="profile-greeting" id="profile-greeting">Hi!</div>
+  </div>
+
+  <div class="profile-menu-actions">
+    <button type="button" class="profile-menu-item logout-btn" onclick="signOut()">
       Logout
     </button>
   </div>
+</div>
 
   <span id="auth-msg-in" style="display:none;"></span>
 </div>

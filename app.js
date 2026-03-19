@@ -186,6 +186,10 @@ window.closeProfileMenu = function closeProfileMenu() {
   if (menu) menu.style.display = "none";
 };
 
+window.goToManageUsers = function goToManageUsers() {
+  window.location.href = "./manage-users.html";
+};
+
 window.toggleLedgerDownloadMenu = function toggleLedgerDownloadMenu(event) {
   event?.stopPropagation?.();
 

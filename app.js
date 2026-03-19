@@ -1342,6 +1342,172 @@ function renderLedger() {
   }
 }
 
+function getCurrentLedgerExportData() {
+  const sel = $("ledger-account");
+  if (!sel) return null;
+
+  const accountId = String(sel.value || "").trim();
+  if (!accountId) return null;
+
+  const acct = COA.find((a) => a.id === accountId);
+  if (!acct) return null;
+
+  const normal = acct.normal || "Debit";
+
+  const acctLines = lines
+    .filter((l) => !l.is_deleted)
+    .filter((l) => (l.resolvedAccountId || l.accountId) === accountId)
+    .filter((l) => {
+      const d = String(l.entry_date || "");
+      if (ledgerFilterFrom && d < ledgerFilterFrom) return false;
+      if (ledgerFilterTo && d > ledgerFilterTo) return false;
+      return true;
+    })
+    .sort(
+      (a, b) =>
+        String(a.entry_date || "").localeCompare(String(b.entry_date || "")) ||
+        String(a.ref || "").localeCompare(String(b.ref || ""))
+    );
+
+  let running = 0;
+
+  const rows = acctLines.map((l) => {
+    const delta =
+      normal === "Credit"
+        ? num(l.credit) - num(l.debit)
+        : num(l.debit) - num(l.credit);
+
+    running += delta;
+
+    return {
+      date: l.entry_date || "",
+      ref: l.ref || "",
+      description: l.description || "",
+      department: l.department || "",
+      payment_method: l.payment_method || "",
+      client_vendor: l.client_vendor || "",
+      remarks: l.remarks || "",
+      debit: Number(l.debit || 0),
+      credit: Number(l.credit || 0),
+      running_balance: running
+    };
+  });
+
+  return {
+    account: acct,
+    rows
+  };
+}
+
+window.downloadLedgerPDF = function downloadLedgerPDF() {
+  if (!window.jspdf || !window.jspdf.jsPDF) {
+    alert("PDF library not loaded.");
+    return;
+  }
+
+  const exportData = getCurrentLedgerExportData();
+  if (!exportData) {
+    alert("Please select an account first.");
+    return;
+  }
+
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF("l", "mm", "a4");
+
+  const accountLabel = `${exportData.account.code} - ${exportData.account.name}`;
+
+  let subtitle = `Account: ${accountLabel}`;
+  if (ledgerFilterFrom && ledgerFilterTo) {
+    subtitle += ` | Date Range: ${ledgerFilterFrom} to ${ledgerFilterTo}`;
+  } else if (ledgerFilterFrom) {
+    subtitle += ` | From: ${ledgerFilterFrom}`;
+  } else if (ledgerFilterTo) {
+    subtitle += ` | To: ${ledgerFilterTo}`;
+  }
+
+  doc.setFontSize(16);
+  doc.text("General Ledger", 14, 16);
+
+  doc.setFontSize(10);
+  doc.text(subtitle, 14, 23);
+
+  const body = exportData.rows.map((r) => [
+    r.date,
+    r.ref,
+    r.description,
+    r.department,
+    r.payment_method,
+    r.client_vendor,
+    r.remarks,
+    money(r.debit),
+    money(r.credit),
+    money(r.running_balance)
+  ]);
+
+  doc.autoTable({
+    startY: 28,
+    head: [[
+      "Date",
+      "Ref",
+      "Description",
+      "Dept/CC",
+      "Pay Method",
+      "Client/Vendor",
+      "Remarks",
+      "Debit",
+      "Credit",
+      "Running Balance"
+    ]],
+    body,
+    styles: {
+      fontSize: 8,
+      cellPadding: 2.5
+    },
+    headStyles: {
+      fillColor: [51, 51, 51]
+    },
+    columnStyles: {
+      7: { halign: "right" },
+      8: { halign: "right" },
+      9: { halign: "right" }
+    }
+  });
+
+  doc.save(`general-ledger-${exportData.account.code}.pdf`);
+};
+
+window.downloadLedgerExcel = function downloadLedgerExcel() {
+  if (!window.XLSX) {
+    alert("Excel library not loaded.");
+    return;
+  }
+
+  const exportData = getCurrentLedgerExportData();
+  if (!exportData) {
+    alert("Please select an account first.");
+    return;
+  }
+
+  const rows = exportData.rows.map((r) => ({
+    Date: r.date,
+    Ref: r.ref,
+    Description: r.description,
+    "Dept/CC": r.department,
+    "Pay Method": r.payment_method,
+    "Client/Vendor": r.client_vendor,
+    Remarks: r.remarks,
+    Debit: r.debit,
+    Credit: r.credit,
+    "Running Balance": r.running_balance
+  }));
+
+  const ws = XLSX.utils.json_to_sheet(rows);
+  const wb = XLSX.utils.book_new();
+
+  XLSX.utils.book_append_sheet(wb, ws, "General Ledger");
+  XLSX.writeFile(wb, `general-ledger-${exportData.account.code}.xlsx`);
+};
+
 // ==============================
 // Compute balances
 // ==============================

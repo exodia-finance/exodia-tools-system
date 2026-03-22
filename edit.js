@@ -8,6 +8,7 @@ const SUPABASE_ANON_KEY =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ0Z2xmYWV5dm1jaWlldW50emhzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk2Nzg0NDUsImV4cCI6MjA4NTI1NDQ0NX0.eDOOS3BKKcNOJ_pq5-QpQkW6d1hpp2vdYPsvzzZgZzo";
 
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const COMPANY_ID = "exodia-main";
 
 console.log("✅ edit.js loaded"); // you should see this in console
 
@@ -104,11 +105,11 @@ function resolveAccountId(rawAccountId, accountName) {
   return raw;
 }
 
-async function loadCOA(userId) {
+async function loadCOA() {
   const { data, error } = await sb
     .from("coa_accounts")
     .select("*")
-    .eq("user_id", userId)
+    .eq("company_id", COMPANY_ID)
     .eq("is_deleted", false)
     .order("code", { ascending: true });
 
@@ -129,49 +130,49 @@ async function loadCOA(userId) {
 // ==============================
 // Fetch entry + lines
 // ==============================
-async function fetchEntry(journalId, userId) {
+async function fetchEntry(journalId) {
   const { data, error } = await sb
     .from("journal_entries")
     .select("*")
     .eq("id", journalId)
-    .eq("user_id", userId)
+    .eq("company_id", COMPANY_ID)
     .single();
 
   if (error) throw error;
   return data;
 }
 
-async function fetchLines(journalId, userId, entryDate, ref) {
-  // try normal linked lines
+async function fetchLines(journalId, entryDate, ref) {
   const { data: linked, error: e1 } = await sb
     .from("journal_lines")
     .select("*")
     .eq("journal_id", journalId)
-    .eq("user_id", userId)
-    .eq("is_deleted", false)
+    .eq("company_id", COMPANY_ID)
+    .or("is_deleted.is.null,is_deleted.eq.false")
     .order("created_at", { ascending: true });
 
   if (e1) throw e1;
   if (linked && linked.length) return linked;
 
-  // fallback for old rows (matched by date+ref)
   const { data: legacy, error: e2 } = await sb
     .from("journal_lines")
     .select("*")
-    .eq("user_id", userId)
-    .eq("is_deleted", false)
+    .eq("company_id", COMPANY_ID)
+    .or("is_deleted.is.null,is_deleted.eq.false")
     .eq("entry_date", entryDate)
     .eq("ref", ref)
     .order("created_at", { ascending: true });
 
   if (e2) throw e2;
 
-  // repair: attach journal_id to legacy rows if they were null
   if (legacy && legacy.length) {
     await sb
       .from("journal_lines")
-      .update({ journal_id: journalId })
-      .eq("user_id", userId)
+      .update({
+        journal_id: journalId,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("company_id", COMPANY_ID)
       .eq("entry_date", entryDate)
       .eq("ref", ref)
       .is("journal_id", null);
@@ -346,7 +347,6 @@ async function saveChanges(journalId, userId) {
 
   setStatus("Saving...");
 
-  // 1) update header
   const { error: headErr } = await sb
     .from("journal_entries")
     .update({
@@ -360,7 +360,7 @@ async function saveChanges(journalId, userId) {
       updated_at: new Date().toISOString(),
     })
     .eq("id", journalId)
-    .eq("user_id", userId);
+    .eq("company_id", COMPANY_ID);
 
   if (headErr) {
     console.error(headErr);
@@ -368,12 +368,14 @@ async function saveChanges(journalId, userId) {
     return;
   }
 
-  // 2) soft delete old lines
   const { error: delErr } = await sb
     .from("journal_lines")
-    .update({ is_deleted: true })
+    .update({
+      is_deleted: true,
+      updated_at: new Date().toISOString(),
+    })
     .eq("journal_id", journalId)
-    .eq("user_id", userId);
+    .eq("company_id", COMPANY_ID);
 
   if (delErr) {
     console.error(delErr);
@@ -381,17 +383,18 @@ async function saveChanges(journalId, userId) {
     return;
   }
 
-  // 3) insert fresh lines
   const fresh = uiLines.map((l) => {
     const acct = COA_BY_ID[l.account_uuid];
     const account_name = acct ? `${acct.code} - ${acct.name}` : "";
 
     return {
       user_id: userId,
+      company_id: COMPANY_ID,
+      created_by: userId,
       journal_id: journalId,
       entry_date,
       ref,
-      account_id: l.account_uuid, // ✅ uuid always
+      account_id: l.account_uuid,
       account_name,
       debit: l.debit,
       credit: l.credit,
@@ -408,18 +411,16 @@ async function saveChanges(journalId, userId) {
     return;
   }
 
- setStatus("Saved ✅");
+  setStatus("Saved ✅");
 
-    // ✅ go back to ledger after save
   const acctId = getQueryParam("account_id") || "";
   const url = new URL("./index.html", window.location.href);
   url.searchParams.set("account_id", acctId);
   url.hash = "ledger";
   window.location.replace(url.toString());
-  return;
 }
 
-async function deleteEntry(journalId, userId) {
+async function deleteEntry(journalId) {
   const ok = confirm("Delete this journal entry?\n\n(This is soft delete.)");
   if (!ok) return;
 
@@ -427,9 +428,12 @@ async function deleteEntry(journalId, userId) {
 
   const { error: e1 } = await sb
     .from("journal_entries")
-    .update({ is_deleted: true, updated_at: new Date().toISOString() })
+    .update({
+      is_deleted: true,
+      updated_at: new Date().toISOString(),
+    })
     .eq("id", journalId)
-    .eq("user_id", userId);
+    .eq("company_id", COMPANY_ID);
 
   if (e1) {
     console.error(e1);
@@ -439,9 +443,12 @@ async function deleteEntry(journalId, userId) {
 
   const { error: e2 } = await sb
     .from("journal_lines")
-    .update({ is_deleted: true })
+    .update({
+      is_deleted: true,
+      updated_at: new Date().toISOString(),
+    })
     .eq("journal_id", journalId)
-    .eq("user_id", userId);
+    .eq("company_id", COMPANY_ID);
 
   if (e2) {
     console.error(e2);
@@ -451,7 +458,6 @@ async function deleteEntry(journalId, userId) {
 
   setStatus("Deleted ✅");
 
-  // ✅ go back to ledger
   const acctId = getQueryParam("account_id") || "";
   const url = new URL("./index.html", window.location.href);
   url.searchParams.set("account_id", acctId);
@@ -479,32 +485,28 @@ async function deleteEntry(journalId, userId) {
       return;
     }
 
-    // load COA first so selects have options
-    await loadCOA(user.id);
+   await loadCOA();
 
-    // load entry + fill header fields
-    const entry = await fetchEntry(journalId, user.id);
+const entry = await fetchEntry(journalId);
 
-    $("e-date").value = entry.entry_date || "";
-    $("e-ref").value = entry.ref || "";
-    $("e-desc").value = entry.description || "";
-    $("e-dept").value = entry.department || "";
-    $("e-pay").value = entry.payment_method || "";
-    $("e-client").value = entry.client_vendor || "";
-    $("e-remarks").value = entry.remarks || "";
+$("e-date").value = entry.entry_date || "";
+$("e-ref").value = entry.ref || "";
+$("e-desc").value = entry.description || "";
+$("e-dept").value = entry.department || "";
+$("e-pay").value = entry.payment_method || "";
+$("e-client").value = entry.client_vendor || "";
+$("e-remarks").value = entry.remarks || "";
 
-    // load + render lines
-const jLines = await fetchLines(journalId, user.id, entry.entry_date, entry.ref);
+const jLines = await fetchLines(journalId, entry.entry_date, entry.ref);
 renderLines(jLines);
 
-    // wire buttons
-    $("btn-add").onclick = () => addEmptyLine();
-    $("btn-save").onclick = () => saveChanges(journalId, user.id);
-    $("btn-delete").onclick = () => deleteEntry(journalId, user.id);
-    $("btn-back").onclick = () => {
-      const acctId = getQueryParam("account_id") || "";
-      window.location.href = `./index.html?account_id=${encodeURIComponent(acctId)}#ledger`;
-    };
+$("btn-add").onclick = () => addEmptyLine();
+$("btn-save").onclick = () => saveChanges(journalId, user.id);
+$("btn-delete").onclick = () => deleteEntry(journalId);
+$("btn-back").onclick = () => {
+  const acctId = getQueryParam("account_id") || "";
+  window.location.href = `./index.html?account_id=${encodeURIComponent(acctId)}#ledger`;
+};
 
     setStatus("Loaded ✅");
   } catch (e) {

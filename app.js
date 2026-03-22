@@ -592,7 +592,8 @@ async function seedCOAFromJsonIfNeeded() {
 
   if (!missing.length) return;
 
-  const rows = missing.map((r) => ({
+ const rows = missing.map((r) => ({
+  user_id: currentUser.id,
   company_id: COMPANY_ID,
   created_by: currentUser.id,
   code: r.code,
@@ -999,7 +1000,8 @@ window.addCOAAccount = async function addCOAAccount() {
   if (!code || !name) return;
 
   try {
-     await sbInsertCOA({
+    await sbInsertCOA({
+  user_id: currentUser.id,
   company_id: COMPANY_ID,
   created_by: currentUser.id,
   code,
@@ -1139,6 +1141,7 @@ window.saveJournal = async function () {
     totalCredit += c;
 
  lineRows.push({
+  user_id: currentUser.id,
   company_id: COMPANY_ID,
   created_by: currentUser.id,
   journal_id: null,
@@ -1161,6 +1164,7 @@ window.saveJournal = async function () {
     .from("journal_entries")
     .insert([
      {
+  user_id: currentUser.id,
   company_id: COMPANY_ID,
   created_by: currentUser.id,
   entry_date,
@@ -3867,6 +3871,7 @@ window.addAccountPopup = async function () {
 
   try {
    await sbInsertCOA({
+  user_id: currentUser.id,
   company_id: COMPANY_ID,
   created_by: currentUser.id,
   code,
@@ -3937,6 +3942,7 @@ window.saveAddCoaModal = async function () {
 
   try {
    await sbInsertCOA({
+  user_id: currentUser.id,
   company_id: COMPANY_ID,
   created_by: currentUser.id,
   code,

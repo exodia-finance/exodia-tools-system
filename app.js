@@ -55,6 +55,8 @@ let ledgerFilterTo = "";
 
 let worksheetFilterFrom = "";
 let worksheetFilterTo = "";
+
+let currentManagedUser = null;
   
 // ==============================
 // AUTH UI helpers
@@ -3226,6 +3228,9 @@ async function initAppAfterLogin() {
   lines = await loadLinesFromDb();
   resolveLinesAccountIds();
 
+  await loadCurrentManagedUser();
+  applyUserAccessUI();
+
   const ledgerSel = $("ledger-account");
   if (ledgerSel) ledgerSel.innerHTML = "";
 
@@ -3265,6 +3270,38 @@ async function initAppAfterLogin() {
       renderLedger();
     }
   }
+
+async function loadCurrentManagedUser() {
+  if (!currentUser) return null;
+
+  const { data, error } = await sb
+    .from("user_access")
+    .select("*")
+    .eq("email", currentUser.email)
+    .single();
+
+  if (error) {
+    console.error("Failed to load current managed user:", error);
+    currentManagedUser = null;
+    return null;
+  }
+
+  currentManagedUser = data;
+  return data;
+}
+
+function applyUserAccessUI() {
+  const role = (currentManagedUser?.access_level || "").toLowerCase();
+
+  const createBtn = $("menu-create-user");
+  const manageBtn = $("menu-manage-access");
+
+  const isAdmin = role === "admin";
+
+  if (createBtn) createBtn.style.display = isAdmin ? "block" : "none";
+  if (manageBtn) manageBtn.style.display = isAdmin ? "block" : "none";
+}
+  
 }
 
 // ==============================

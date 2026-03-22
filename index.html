@@ -16,6 +16,13 @@
     <input id="auth-pass" type="password" placeholder="Password">
     <button id="auth-toggle-pass" type="button">👁</button>
     <button id="auth-login-btn" onclick="signIn()" disabled>Login</button>
+    <button id="menu-create-user" type="button" class="profile-menu-item" onclick="goToCreateUser()">
+  Create User
+</button>
+
+<button id="menu-manage-access" type="button" class="profile-menu-item" onclick="goToManageUserAccess()">
+  Manage User Access
+</button>
     <span id="auth-msg"></span>
   </div>
 

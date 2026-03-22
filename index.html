@@ -401,6 +401,44 @@
       </table>
     </div>
   </div>
+
+<!-- Financial Report Summary -->
+<div id="ws-frs" class="worksheet-card" style="display:none;">
+  <div class="worksheet-card-head">
+    <div>
+      <h3>Financial Report Summary</h3>
+      <p class="worksheet-subtext">Compare balances across selected years.</p>
+    </div>
+    <button class="worksheet-download-btn" onclick="downloadFinancialReportSummaryPDF()">Download PDF</button>
+  </div>
+
+  <div style="margin:10px 0; display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+    <label>
+      Year 1
+      <input type="number" id="frs-year-1" placeholder="2024" style="width:100px;">
+    </label>
+
+    <label>
+      Year 2
+      <input type="number" id="frs-year-2" placeholder="2023" style="width:100px;">
+    </label>
+
+    <label>
+      Year 3
+      <input type="number" id="frs-year-3" placeholder="2022" style="width:100px;">
+    </label>
+
+    <button class="btn" onclick="renderFinancialReportSummary()">Apply Years</button>
+  </div>
+
+  <div class="worksheet-table-wrap">
+    <table border="1" cellpadding="6">
+      <thead id="frs-head"></thead>
+      <tbody id="frs-body"></tbody>
+    </table>
+  </div>
+</div>
+  
 </section>
 
 <!-- ========================= HISTORY ========================= -->

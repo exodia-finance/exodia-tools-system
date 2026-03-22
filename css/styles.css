@@ -1739,3 +1739,79 @@ WORKSHEET - CLEAN PREMIUM DESIGN
   font-weight: 700;
   color: #555;
 }
+
+/* =========================
+PROFIT & LOSS IMPROVEMENT
+========================= */
+
+#ws-pl table{
+  width: 100%;
+}
+
+#ws-pl tbody tr:first-child td{
+  background: #fff3e8;
+  font-weight: 800;
+  color: #8a420c;
+  border-top: 2px solid #ff6a00;
+}
+
+#ws-pl tbody tr.section-header td{
+  background: #fff1e6;
+  font-weight: 800;
+  color: #9a3412;
+  border-top: 2px solid #ff6a00;
+}
+
+#ws-pl tbody td:first-child{
+  font-weight: 600;
+}
+
+#ws-pl tbody td:last-child{
+  text-align: right;
+  font-weight: 700;
+}
+
+#ws-pl tfoot td{
+  font-size: 16px;
+  background: #ffe9d8;
+  color: #7a2e0e;
+}
+
+/* =========================
+SFP IMPROVEMENT
+========================= */
+
+#ws-sfp table{
+  max-width: 900px;
+}
+
+#ws-sfp tbody tr.section-header td{
+  background: #fff3e8;
+  font-weight: 800;
+  color: #8a420c;
+  border-top: 2px solid #ff6a00;
+}
+
+#ws-sfp tbody td:first-child{
+  font-weight: 700;
+  color: #a14d12;
+}
+
+#ws-sfp tbody td:last-child{
+  text-align: right;
+  font-weight: 700;
+}
+
+#ws-sfp tbody tr.total-row td{
+  background: #ffe9d8;
+  font-weight: 800;
+  color: #7a2e0e;
+}
+
+.worksheet-tab-btn.active{
+  background: #ff6a00;
+  border-color: #ff6a00;
+  color: #fff;
+}
+
+

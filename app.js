@@ -3215,6 +3215,38 @@ window.downloadFinancialReportSummaryPDF = async function downloadFinancialRepor
   doc.save("financial-report-summary.pdf");
 };
 
+async function loadCurrentManagedUser() {
+  if (!currentUser) return null;
+
+  const { data, error } = await sb
+    .from("user_access")
+    .select("*")
+    .eq("email", currentUser.email)
+    .single();
+
+  if (error) {
+    console.error("Failed to load current managed user:", error);
+    currentManagedUser = null;
+    return null;
+  }
+
+  currentManagedUser = data;
+  return data;
+}
+
+function applyUserAccessUI() {
+  const role = String(currentManagedUser?.access_level || "").toLowerCase();
+
+  const createBtn = $("menu-create-user");
+  const manageBtn = $("menu-manage-access");
+
+  const email = String(currentUser?.email || "").toLowerCase();
+  const isAdmin = role === "admin" || email === "financeadmin@exodiagamedev.com";
+
+  if (createBtn) createBtn.style.display = isAdmin ? "block" : "none";
+  if (manageBtn) manageBtn.style.display = isAdmin ? "block" : "none";
+}
+
 // ==============================
 // Init after login
 // ==============================
@@ -3270,38 +3302,6 @@ async function initAppAfterLogin() {
       renderLedger();
     }
   }
-
-async function loadCurrentManagedUser() {
-  if (!currentUser) return null;
-
-  const { data, error } = await sb
-    .from("user_access")
-    .select("*")
-    .eq("email", currentUser.email)
-    .single();
-
-  if (error) {
-    console.error("Failed to load current managed user:", error);
-    currentManagedUser = null;
-    return null;
-  }
-
-  currentManagedUser = data;
-  return data;
-}
-
-function applyUserAccessUI() {
-  const role = (currentManagedUser?.access_level || "").toLowerCase();
-
-  const createBtn = $("menu-create-user");
-  const manageBtn = $("menu-manage-access");
-
-  const isAdmin = role === "admin";
-
-  if (createBtn) createBtn.style.display = isAdmin ? "block" : "none";
-  if (manageBtn) manageBtn.style.display = isAdmin ? "block" : "none";
-}
-  
 }
 
 // ==============================

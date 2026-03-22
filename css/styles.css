@@ -562,7 +562,7 @@ CHART OF ACCOUNTS - CLEAN FINAL
   background: #ffffff;
   border: 1px solid #f0d5c2;
   border-radius: 16px;
-  overflow: hidden;
+  overflow: visible;
   box-shadow: 0 12px 28px rgba(0,0,0,0.08);
 }
 
@@ -608,6 +608,8 @@ CHART OF ACCOUNTS - CLEAN FINAL
 
 #coa tbody td:last-child{
   text-align: right;
+  position: relative;
+  overflow: visible;
 }
 
 .coa-action-btn{
@@ -631,14 +633,15 @@ CHART OF ACCOUNTS - CLEAN FINAL
   display: none;
   position: absolute;
   right: 0;
-  top: 34px;
-  min-width: 150px;
+  bottom: calc(100% + 8px);
+  top: auto;
+  min-width: 170px;
   border: 1px solid #ffd0ad;
   background: #ffffff;
   border-radius: 12px;
   box-shadow: 0 14px 24px rgba(0,0,0,0.14);
   padding: 6px;
-  z-index: 999;
+  z-index: 3000;
 }
 
 .coa-menu button{

@@ -1991,10 +1991,10 @@ function renderProfitAndLoss() {
 
   let totalRevenue = 0;
 
-  const revHead = document.createElement("tr");
-  revHead.className = "section-header";
-  revHead.innerHTML = `<td colspan="2">Revenue</td>`;
-  tbody.appendChild(revHead);
+ const revHead = document.createElement("tr");
+revHead.className = "section-header";
+revHead.innerHTML = `<td colspan="2">Revenue</td>`;
+tbody.appendChild(revHead);
 
   revenueAccounts.forEach((acct) => {
     const acctId = acct.id;
@@ -2063,10 +2063,10 @@ function renderProfitAndLoss() {
 
   let totalExpense = 0;
 
-  const expHead = document.createElement("tr");
-  expHead.className = "section-header";
-  expHead.innerHTML = `<td colspan="2">Expenses</td>`;
-  tbody.appendChild(expHead);
+ const expHead = document.createElement("tr");
+expHead.className = "section-header";
+expHead.innerHTML = `<td colspan="2">Expenses</td>`;
+tbody.appendChild(expHead);
 
   // -----------------------------
   // DEPARTMENT EXPENSE GROUPS FIRST
@@ -2110,9 +2110,9 @@ function renderProfitAndLoss() {
   // -----------------------------
   if (companyItems.length > 0) {
   const companyHead = document.createElement("tr");
-  companyHead.className = "section-header";
-  companyHead.innerHTML = `<td colspan="2">Company Expenses</td>`;
-  tbody.appendChild(companyHead);
+companyHead.className = "section-header";
+companyHead.innerHTML = `<td colspan="2">Company Expenses</td>`;
+tbody.appendChild(companyHead);
 
     companyItems
       .sort((a, b) => {

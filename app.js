@@ -290,7 +290,7 @@ async function sbFetchJournalEntries() {
   const { data, error } = await sb
     .from("journal_entries")
     .select("*")
-    .eq("company_id", COMPANY_ID)
+    .eq("user_id", currentUser.id)
     .or("is_deleted.is.null,is_deleted.eq.false")
     .order("created_at", { ascending: false });
 
@@ -317,7 +317,7 @@ async function sbFetchJournalLines() {
         remarks
       )
     `)
-    .eq("company_id", COMPANY_ID)
+    .eq("user_id", currentUser.id)
     .or("is_deleted.is.null,is_deleted.eq.false")
     .order("created_at", { ascending: true });
 
@@ -372,7 +372,7 @@ async function sbFetchJournalLinesForEntry(journal_id) {
   const { data, error } = await sb
     .from("journal_lines")
     .select("*")
-    .eq("company_id", COMPANY_ID)
+    .eq("user_id", currentUser.id)
     .eq("journal_id", journal_id)
     .or("is_deleted.is.null,is_deleted.eq.false")
     .order("created_at", { ascending: true });
@@ -514,7 +514,7 @@ async function sbFetchCOA() {
   const { data, error } = await sb
     .from("coa_accounts")
     .select("*")
-    .eq("company_id", COMPANY_ID)
+    .eq("user_id", currentUser.id)
     .eq("is_deleted", false)
     .order("code", { ascending: true });
 
@@ -996,15 +996,14 @@ window.addCOAAccount = async function addCOAAccount() {
   if (!code || !name) return;
 
   try {
-    await sbInsertCOA({
-      company_id: COMPANY_ID,
-      created_by: currentUser.id,
-      code,
-      name,
-      type,
-      normal,
-      is_deleted: false,
-    });
+     await sbInsertCOA({
+  user_id: currentUser.id,
+  code,
+  name,
+  type,
+  normal,
+  is_deleted: false,
+});
 
     if (codeEl) codeEl.value = "";
     if (nameEl) nameEl.value = "";
@@ -1135,9 +1134,8 @@ window.saveJournal = async function () {
     totalDebit += d;
     totalCredit += c;
 
-   lineRows.push({
-  company_id: COMPANY_ID,
-  created_by: currentUser.id,
+  lineRows.push({
+  user_id: currentUser.id,
   journal_id: null,
   entry_date,
   ref,
@@ -1158,16 +1156,15 @@ window.saveJournal = async function () {
     .from("journal_entries")
     .insert([
       {
-        company_id: COMPANY_ID,
-        created_by: currentUser.id,
-        entry_date,
-        ref,
-        description,
-        department,
-        payment_method,
-        client_vendor,
-        remarks,
-      },
+  user_id: currentUser.id,
+  entry_date,
+  ref,
+  description,
+  department,
+  payment_method,
+  client_vendor,
+  remarks,
+},
     ])
     .select("id")
     .single();

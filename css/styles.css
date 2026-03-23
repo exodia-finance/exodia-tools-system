@@ -357,15 +357,6 @@ JOURNAL INPUT IMPROVEMENT
 /* =========================
 AUTH BOX
 ========================= */
-#auth-email,
-#auth-pass{
-  width:220px;
-}
-
-#auth-msg{
-  margin-left:10px;
-}
-
 .profile-wrap{
   position: relative;
   display: inline-flex;
@@ -1841,35 +1832,68 @@ WORKSHEET - CLEAN PREMIUM DESIGN
 AUTH - CLEAN FINAL
 ========================= */
 
-#auth-box{
-  position: relative;
-  width: 100%;
-  min-height: 100vh;
+html, body{
+  height: 100%;
   margin: 0;
-  padding: 0;
-  border: 0;
+  overflow-x: hidden;
+}
+
+body{
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   background: #f5f6f8;
 }
 
-/* full-screen centered login area */
+/* login wrapper */
+#auth-box{
+  position: relative;
+  min-height: 100vh;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+/* logged out screen */
 #auth-logged-out{
   position: fixed;
   inset: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  display: grid;
+  place-items: center;
   padding: 24px;
   box-sizing: border-box;
-  background: linear-gradient(135deg, #fff6ef 0%, #ffe2cc 100%);
+  background: linear-gradient(135deg, #fff7f0 0%, #ffe6d4 100%);
   overflow: hidden;
-  z-index: 20;
+  z-index: 30;
 }
 
+/* background glow */
+#auth-logged-out::before{
+  content: "";
+  position: absolute;
+  width: 520px;
+  height: 520px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,106,0,0.18), transparent 70%);
+  top: -140px;
+  right: -140px;
+}
+
+#auth-logged-out::after{
+  content: "";
+  position: absolute;
+  width: 420px;
+  height: 420px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,106,0,0.12), transparent 70%);
+  bottom: -140px;
+  left: -140px;
+}
+
+/* login card */
 .auth-login-card{
   position: relative;
   z-index: 2;
-  width: 100%;
-  max-width: 390px;
+  width: min(100%, 390px);
   background: #ffffff;
   border: 1px solid #eadfd6;
   border-radius: 20px;
@@ -1964,30 +1988,7 @@ AUTH - CLEAN FINAL
   color: #666;
 }
 
-/* orange soft background shapes */
-#auth-logged-out::before{
-  content: "";
-  position: absolute;
-  width: 600px;
-  height: 600px;
-  background: radial-gradient(circle, rgba(255,106,0,0.22), transparent 70%);
-  top: -180px;
-  right: -180px;
-  z-index: 1;
-}
-
-#auth-logged-out::after{
-  content: "";
-  position: absolute;
-  width: 520px;
-  height: 520px;
-  background: radial-gradient(circle, rgba(255,106,0,0.14), transparent 70%);
-  bottom: -180px;
-  left: -180px;
-  z-index: 1;
-}
-
-/* logged-in avatar area */
+/* logged in profile area */
 #auth-logged-in{
   position: absolute;
   top: 16px;
@@ -1996,11 +1997,9 @@ AUTH - CLEAN FINAL
   align-items: center;
   justify-content: flex-end;
   gap: 8px;
-  z-index: 50;
+  z-index: 60;
 }
 
-/* hide the plain logged-in text */
 #auth-msg-in{
   display: none !important;
 }
-

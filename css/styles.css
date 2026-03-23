@@ -359,15 +359,12 @@ AUTH BOX
 ========================= */
 
 #auth-box{
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
+  position: relative;
   padding: 10px 16px;
   margin: 10px;
   border: 1px solid #ccc;
   background: #fff;
   border-radius: 12px;
-  position: relative;
 }
 
 #auth-email,
@@ -1851,63 +1848,92 @@ WORKSHEET - CLEAN PREMIUM DESIGN
 }
 
 /* =========================
-LOGIN SCREEN (CENTERED)
+AUTH - CLEAN FINAL
 ========================= */
 
+/* normal auth container */
 #auth-box{
-  position: fixed;
-  inset: 0;
+  position: relative;
+  padding: 10px 16px;
+  margin: 10px;
+  border: 1px solid #ccc;
+  background: #fff;
+  border-radius: 12px;
+}
+
+/* logged out = center login card only */
+#auth-logged-out{
+  min-height: calc(100vh - 140px);
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #fff6ef, #f3f4f6);
-  border: none;
-  margin: 0;
-  padding: 0;
 }
 
-/* Login card */
-#auth-logged-out{
+.auth-login-card{
+  width: 100%;
+  max-width: 380px;
   background: #ffffff;
-  padding: 30px 28px;
-  border-radius: 16px;
-  box-shadow: 0 12px 30px rgba(0,0,0,0.12);
-  width: 360px;
-  display: flex;
-  flex-direction: column;
+  border: 1px solid #eadfd6;
+  border-radius: 18px;
+  box-shadow: 0 16px 36px rgba(0,0,0,0.12);
+  padding: 28px 24px;
+}
+
+.auth-login-title{
+  margin: 0 0 18px;
+  text-align: center;
+  font-size: 22px;
+  font-weight: 800;
+  color: #1f1f1f;
+}
+
+.auth-login-fields{
+  display: grid;
   gap: 12px;
 }
 
-/* Title */
-#auth-logged-out::before{
-  content: "Exodia Ledger Login";
-  font-size: 20px;
-  font-weight: 800;
-  text-align: center;
-  margin-bottom: 10px;
-  color: #222;
-}
-
-/* Inputs */
 #auth-email,
 #auth-pass{
   width: 100%;
-  padding: 12px;
-  border: 1px solid #ddd;
+  padding: 12px 14px;
+  border: 1px solid #d8d8d8;
   border-radius: 10px;
   font-size: 14px;
+  box-sizing: border-box;
 }
 
-/* Focus */
 #auth-email:focus,
 #auth-pass:focus{
   outline: none;
   border-color: #ff6a00;
-  box-shadow: 0 0 0 3px rgba(255,106,0,0.15);
+  box-shadow: 0 0 0 4px rgba(255,106,0,0.12);
 }
 
-/* Login button */
+.auth-pass-wrap{
+  position: relative;
+  width: 100%;
+}
+
+.auth-pass-wrap #auth-pass{
+  padding-right: 42px;
+}
+
+.auth-pass-wrap #auth-toggle-pass{
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  font-size: 14px;
+  color: #666;
+  padding: 0;
+  line-height: 1;
+}
+
 #auth-login-btn{
+  width: 100%;
   padding: 12px;
   background: #ff6a00;
   border: none;
@@ -1915,32 +1941,27 @@ LOGIN SCREEN (CENTERED)
   font-weight: 700;
   border-radius: 10px;
   cursor: pointer;
-  transition: 0.2s ease;
+  transition: 0.18s ease;
 }
 
 #auth-login-btn:hover{
-  background: #e55b00;
+  background: #e45c00;
 }
 
-/* Show password button */
-#auth-toggle-pass{
-  position: absolute;
-  right: 14px;
-  top: 50%;
-  transform: translateY(-50%);
-  border: none;
-  background: none;
-  cursor: pointer;
+#auth-login-btn:disabled{
+  background: #ffc7a0;
+  cursor: not-allowed;
 }
 
-/* Wrap password field */
-#auth-pass{
-  position: relative;
-}
-
-/* Message */
 #auth-msg{
   text-align: center;
   font-size: 13px;
-  color: #888;
+  margin-top: 4px;
+}
+
+/* logged in = profile at top right */
+#auth-logged-in{
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
 }

@@ -192,7 +192,6 @@ window.signIn = async function signIn() {
   }
   
   setAuthMsg("");
-  setAuthMsgIn("Logged in ✅");
   setUI(true, currentUser?.email || email);
 
   await initAppAfterLogin();

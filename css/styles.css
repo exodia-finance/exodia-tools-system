@@ -1851,7 +1851,6 @@ AUTH - CLEAN FINAL
   background: #f5f6f8;
 }
 
-/* logged out = full screen centered login */
 #auth-logged-out{
   position: fixed;
   inset: 0;
@@ -1862,21 +1861,9 @@ AUTH - CLEAN FINAL
   background: linear-gradient(135deg, #fff6ef 0%, #ffe2cc 100%);
 }
 
+/* 👇 ADD THIS */
 .auth-login-card{
-  position: relative;
-  z-index: 2;
-
-  width: 100%;
-  max-width: 380px;
-  background: #ffffff;
-  border: 1px solid #eadfd6;
-  border-radius: 20px;
-
-  box-shadow: 
-    0 20px 50px rgba(0,0,0,0.12),
-    0 4px 12px rgba(255,106,0,0.10);
-
-  padding: 30px 26px;
+  transform: translateY(20px); /* pushes slightly down */
 }
 
 .auth-login-title{

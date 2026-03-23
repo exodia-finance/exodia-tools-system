@@ -65,6 +65,7 @@ const COMPANY_ID = "exodia-main";
 // ==============================
 function setUI(isLoggedIn, email = "") {
   const app = $("app");
+  const authBox = $("auth-box");
   const outBox = $("auth-logged-out");
   const inBox = $("auth-logged-in");
   const userEl = $("auth-user");

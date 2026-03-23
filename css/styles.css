@@ -1856,6 +1856,10 @@ AUTH - CLEAN FINAL
 
 #auth-box{
   position: relative;
+  display: block;
+  justify-content: initial;
+  align-items: initial;
+  width: 100%;
   min-height: 100vh;
   padding: 0;
   margin: 0;

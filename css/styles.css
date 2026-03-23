@@ -357,19 +357,6 @@ JOURNAL INPUT IMPROVEMENT
 /* =========================
 AUTH BOX
 ========================= */
-
-#auth-box{
-  position: relative;
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  padding: 10px 16px;
-  margin: 10px;
-  border: 1px solid #ccc;
-  background: #fff;
-  border-radius: 12px;
-}
-
 #auth-email,
 #auth-pass{
   width:220px;

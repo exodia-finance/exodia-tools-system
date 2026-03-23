@@ -611,7 +611,7 @@ async function seedCOAFromJsonIfNeeded() {
 }
 
 async function loadCOAFromDbOrJson() {
-  await seedCOAFromJsonIfNeeded();
+  // await seedCOAFromJsonIfNeeded();
 
   try {
     const dbCOA = await sbFetchCOA();
@@ -3591,33 +3591,6 @@ window.viewHistoryEntry = async function viewHistoryEntry(journal_id) {
   } else {
     setUI(false);
   }
-
-  const isEditPage = window.location.pathname.endsWith("edit.html");
-if (isEditPage) {
-  const journal_id = getQueryParam("journal_id");
-  if (!journal_id) {
-    alert("Missing journal_id in URL.");
-    return;
-  }
-
-  // load COA so dropdown has options
-  COA = await loadCOAFromDbOrJson();
-  rebuildCoaIndex();
-
-  // fetch header + lines
-  const entry = await sbFetchJournalEntryById(journal_id);
-  const jLines = await sbFetchJournalLinesByJournalId(journal_id);
-
-  // optional: show header fields if edit.html has these ids
-  // (safe even if not present)
-  $("edit-date") && ( $("edit-date").value = entry?.entry_date || "" );
-  $("edit-ref") && ( $("edit-ref").value = entry?.ref || "" );
-  $("edit-desc") && ( $("edit-desc").value = entry?.description || "" );
-
-  // IMPORTANT: this must match your edit.html tbody id
-  // Your renderEditLines currently uses: "edit-lines-body"
-  renderEditLines(jLines);
-}
   
 })();
 

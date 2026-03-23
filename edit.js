@@ -110,7 +110,7 @@ async function loadCOA() {
     .from("coa_accounts")
     .select("*")
     .eq("company_id", COMPANY_ID)
-    .eq("is_deleted", false)
+    .or("is_deleted.is.null,is_deleted.eq.false")
     .order("code", { ascending: true });
 
   if (error) throw error;
@@ -165,19 +165,18 @@ async function fetchLines(journalId, entryDate, ref) {
 
   if (e2) throw e2;
 
-  if (legacy && legacy.length) {
-    await sb
-      .from("journal_lines")
-      .update({
-        journal_id: journalId,
-        updated_at: new Date().toISOString(),
-      })
-      .eq("company_id", COMPANY_ID)
-      .eq("entry_date", entryDate)
-      .eq("ref", ref)
-      .is("journal_id", null);
-  }
-
+ if (legacy && legacy.length) {
+  await sb
+    .from("journal_lines")
+    .update({
+      journal_id: journalId
+    })
+    .eq("company_id", COMPANY_ID)
+    .eq("entry_date", entryDate)
+    .eq("ref", ref)
+    .is("journal_id", null);
+}
+  
   return legacy || [];
 }
 
@@ -345,7 +344,7 @@ async function saveChanges(journalId, userId) {
     return;
   }
 
-  setStatus("Saving...");
+  setStatus("Saving changes...");
 
   const { error: headErr } = await sb
     .from("journal_entries")
@@ -369,19 +368,18 @@ async function saveChanges(journalId, userId) {
   }
 
   const { error: delErr } = await sb
-    .from("journal_lines")
-    .update({
-      is_deleted: true,
-      updated_at: new Date().toISOString(),
-    })
-    .eq("journal_id", journalId)
-    .eq("company_id", COMPANY_ID);
+  .from("journal_lines")
+  .update({
+    is_deleted: true
+  })
+  .eq("journal_id", journalId)
+  .eq("company_id", COMPANY_ID);
 
   if (delErr) {
-    console.error(delErr);
-    setStatus("Failed to update lines (soft delete).", true);
-    return;
-  }
+  console.error("journal_lines soft delete failed:", delErr);
+  setStatus(`Failed to update lines: ${delErr.message || "unknown error"}`, true);
+  return;
+}
 
   const fresh = uiLines.map((l) => {
     const acct = COA_BY_ID[l.account_uuid];
@@ -411,26 +409,28 @@ async function saveChanges(journalId, userId) {
     return;
   }
 
-  setStatus("Saved ✅");
+  setStatus("Journal entry updated successfully ✅");
 
-  const acctId = getQueryParam("account_id") || "";
-  const url = new URL("./index.html", window.location.href);
-  url.searchParams.set("account_id", acctId);
-  url.hash = "ledger";
+const acctId = getQueryParam("account_id") || "";
+const url = new URL("./index.html", window.location.href);
+url.searchParams.set("account_id", acctId);
+url.hash = "ledger";
+
+setTimeout(() => {
   window.location.replace(url.toString());
+}, 1000);
 }
 
 async function deleteEntry(journalId) {
   const ok = confirm("Delete this journal entry?\n\n(This is soft delete.)");
   if (!ok) return;
 
-  setStatus("Deleting...");
+  setStatus("Deleting entry...");
 
   const { error: e1 } = await sb
     .from("journal_entries")
     .update({
       is_deleted: true,
-      updated_at: new Date().toISOString(),
     })
     .eq("id", journalId)
     .eq("company_id", COMPANY_ID);
@@ -442,27 +442,29 @@ async function deleteEntry(journalId) {
   }
 
   const { error: e2 } = await sb
-    .from("journal_lines")
-    .update({
-      is_deleted: true,
-      updated_at: new Date().toISOString(),
-    })
-    .eq("journal_id", journalId)
-    .eq("company_id", COMPANY_ID);
+  .from("journal_lines")
+  .update({
+    is_deleted: true
+  })
+  .eq("journal_id", journalId)
+  .eq("company_id", COMPANY_ID);
 
   if (e2) {
-    console.error(e2);
-    setStatus("Entry deleted, but failed to delete lines.", true);
-    return;
-  }
+  console.error("journal_lines delete failed:", e2);
+  setStatus(`Entry deleted, but failed to delete lines: ${e2.message || "unknown error"}`, true);
+  return;
+}
 
-  setStatus("Deleted ✅");
+  setStatus("Journal entry deleted successfully ✅");
 
-  const acctId = getQueryParam("account_id") || "";
-  const url = new URL("./index.html", window.location.href);
-  url.searchParams.set("account_id", acctId);
-  url.hash = "ledger";
+const acctId = getQueryParam("account_id") || "";
+const url = new URL("./index.html", window.location.href);
+url.searchParams.set("account_id", acctId);
+url.hash = "ledger";
+
+setTimeout(() => {
   window.location.replace(url.toString());
+}, 1000);
 }
 
 // ==============================

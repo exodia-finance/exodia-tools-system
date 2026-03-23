@@ -28,8 +28,8 @@ const SUPABASE_ANON_KEY =
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ0Z2xmYWV5dm1jaWlldW50emhzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk2Nzg0NDUsImV4cCI6MjA4NTI1NDQ0NX0.eDOOS3BKKcNOJ_pq5-QpQkW6d1hpp2vdYPsvzzZgZzo";
 
 // IMPORTANT: your index.html loads supabase-js first then app.js
-if (!window.supabase) {
-  alert("Supabase library not loaded. Check script tag order in index.html.");
+if (!window.supabase || typeof window.supabase.createClient !== "function") {
+  throw new Error("Supabase library not loaded. Check script tag order in index.html.");
 }
 
 const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -57,6 +57,7 @@ let worksheetFilterFrom = "";
 let worksheetFilterTo = "";
 
 let currentManagedUser = null;
+let selectedCOAId = "";
 const COMPANY_ID = "exodia-main";
   
 // ==============================
@@ -108,6 +109,7 @@ function setAuthMsgIn(text) {
   const msg = $("auth-msg-in");
   if (!msg) return;
   msg.textContent = text || "";
+  msg.style.display = text ? "inline" : "none";
 }
 
 function clearAuthInputs() {
@@ -521,11 +523,12 @@ function normalizeCOA(row) {
 
 async function sbFetchCOA() {
   if (!currentUser) return [];
+
   const { data, error } = await sb
     .from("coa_accounts")
     .select("*")
     .eq("company_id", COMPANY_ID)
-    .eq("is_deleted", false)
+    .or("is_deleted.is.null,is_deleted.eq.false")
     .order("code", { ascending: true });
 
   if (error) throw error;
@@ -1276,22 +1279,35 @@ function renderCOA() {
   list.forEach((a) => {
     const bal = balances[a.id] || 0;
 
-    const tr = document.createElement("tr");
-    tr.innerHTML = `
-      <td>${esc(a.code)}</td>
-      <td>${esc(a.name)}</td>
-      <td>${esc(a.type)}</td>
-      <td>${esc(a.normal)}</td>
-      <td style="text-align:right;">${money(bal)}</td>
-      <td style="position:relative; text-align:right;">
-        <button class="coa-action-btn" onclick="toggleCoaMenu('${a.id}', event)">⋯</button>
-        <div class="coa-menu" data-coa-menu="${a.id}">
-          <button onclick="editAccountPrompt('${a.id}')">✏️ Edit name</button>
-          <button class="danger" onclick="deleteCOAAccount('${a.id}')">🗑 Delete</button>
-        </div>
-      </td>
-    `;
-    tbody.appendChild(tr);
+   const tr = document.createElement("tr");
+tr.setAttribute("data-coa-row", a.id);
+
+tr.addEventListener("click", () => {
+  selectedCOAId = a.id;
+});
+
+const actionHtml = canEditBooks()
+  ? `
+    <button class="coa-action-btn" onclick="toggleCoaMenu('${a.id}', event)">⋯</button>
+    <div class="coa-menu" data-coa-menu="${a.id}">
+      <button onclick="editAccountPrompt('${a.id}')">✏️ Edit name</button>
+      <button class="danger" onclick="deleteCOAAccount('${a.id}')">🗑 Delete</button>
+    </div>
+  `
+  : `<span class="muted">View only</span>`;
+
+tr.innerHTML = `
+  <td>${esc(a.code)}</td>
+  <td>${esc(a.name)}</td>
+  <td>${esc(a.type)}</td>
+  <td>${esc(a.normal)}</td>
+  <td style="text-align:right;">${money(bal)}</td>
+  <td style="position:relative; text-align:right;">
+    ${actionHtml}
+  </td>
+`;
+
+tbody.appendChild(tr);
   });
 
   if (list.length === 0) {

@@ -75,20 +75,30 @@ function setUI(isLoggedIn, email = "") {
   const avatarLargeEl = $("profile-avatar-large");
 
   if (isLoggedIn) {
+    if (authBox) {
+      authBox.style.minHeight = "0";
+      authBox.style.background = "transparent";
+    }
+
     if (app) app.style.display = "block";
     if (outBox) outBox.style.display = "none";
     if (inBox) inBox.style.display = "inline-flex";
     if (userEl) userEl.textContent = email || "";
     if (topEmailEl) topEmailEl.textContent = email || "";
 
-   const displayName = (email || "User").split("@")[0];
-   if (greetingEl) greetingEl.textContent = `Hi, ${displayName}!`;
+    const displayName = (email || "User").split("@")[0];
+    if (greetingEl) greetingEl.textContent = `Hi, ${displayName}!`;
 
-   const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(email || "User")}&background=ff8a00&color=fff`;
+    const avatarUrl = `https://ui-avatars.com/api/?name=${encodeURIComponent(email || "User")}&background=ff8a00&color=fff`;
 
-   if (avatarEl) avatarEl.src = avatarUrl;
-   if (avatarLargeEl) avatarLargeEl.src = avatarUrl;
+    if (avatarEl) avatarEl.src = avatarUrl;
+    if (avatarLargeEl) avatarLargeEl.src = avatarUrl;
   } else {
+    if (authBox) {
+      authBox.style.minHeight = "100vh";
+      authBox.style.background = "#f5f6f8";
+    }
+
     if (app) app.style.display = "none";
     if (outBox) outBox.style.display = "block";
     if (inBox) inBox.style.display = "none";

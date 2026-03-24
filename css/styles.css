@@ -2057,18 +2057,20 @@ body{
 #sidebar-menu {
   position: fixed;
   top: 0;
-  left: -270px;
+  left: 0;
   width: 260px;
   height: 100%;
   background: #ffffff;
   box-shadow: 2px 0 14px rgba(0, 0, 0, 0.18);
   z-index: 1199;
-  transition: left 0.25s ease;
   padding: 18px 14px;
+
+  transform: translateX(-100%);
+  transition: transform 0.25s ease;
 }
 
 #sidebar-menu.open {
-  left: 0;
+  transform: translateX(0);
 }
 
 .sidebar-header {

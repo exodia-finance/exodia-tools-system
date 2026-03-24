@@ -184,7 +184,6 @@
       return null;
     }
 
-    console.log("Access token:", data.session.access_token);
     return data.session.access_token;
   }
 
@@ -213,24 +212,21 @@
       const token = await getAccessToken();
       if (!token) return;
 
-      const res = await fetch(`${SUPABASE_URL}/functions/v1/invite-user`, {
-        method: "POST",
+      const { data, error } = await sb.functions.invoke("invite-user", {
         headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`,
-          "apikey": SUPABASE_ANON_KEY
+          Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({
+        body: {
           email,
           access_level: "Editor"
-        })
+        }
       });
 
-      const result = await res.json();
+      console.log("Invite data:", data);
+      console.log("Invite error:", error);
 
-      if (!res.ok) {
-        console.log("Invite error response:", result);
-        setStatus((result && result.error) ? result.error : "Failed to send invite.", true);
+      if (error) {
+        setStatus(error.message || "Failed to send invite.", true);
         return;
       }
 

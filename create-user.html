@@ -154,8 +154,6 @@
         </div>
 
         <div class="manage-field full">
-          <label for="mu-password">Password *</label>
-          <input id="mu-password" type="password" placeholder="Enter password">
         </div>
       </div>
 
@@ -190,9 +188,8 @@
     const first_name = document.getElementById("mu-first-name").value.trim();
     const last_name = document.getElementById("mu-last-name").value.trim();
     const email = document.getElementById("mu-email").value.trim();
-    const password = document.getElementById("mu-password").value;
 
-    if (!email || !password) {
+    if (!email) {
       setStatus("Email and password are required.", true);
       return;
     }
@@ -200,18 +197,18 @@
     setStatus("Creating user...");
 
     try {
-      const res = await fetch(`${SUPABASE_URL}/functions/v1/create-user`, {
+      const res = await fetch(`${SUPABASE_URL}/functions/v1/invite-user`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           "Authorization": `Bearer ${SUPABASE_ANON_KEY}`
         },
         body: JSON.stringify({
-          email,
-          password,
-          first_name,
-          last_name
-        })
+  email,
+  first_name,
+  last_name,
+  access_level: "Editor"
+})
       });
 
       const result = await res.json();
@@ -220,19 +217,6 @@
         setStatus(result.error || "Failed to create user.", true);
         return;
       }
-
-      const { error: insertError } = await sb
-        .from("user_access")
-        .insert([
-          {
-            email,
-            first_name,
-            last_name,
-            access_level: "Editor",
-            status: "Active",
-            last_online: null
-          }
-        ]);
 
       if (insertError) {
         setStatus(insertError.message || "User created in Auth but failed to save in table.", true);
@@ -244,7 +228,6 @@
       document.getElementById("mu-first-name").value = "";
       document.getElementById("mu-last-name").value = "";
       document.getElementById("mu-email").value = "";
-      document.getElementById("mu-password").value = "";
 
       setTimeout(() => {
         window.location.href = "./manage-user-access.html";

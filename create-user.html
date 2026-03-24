@@ -161,19 +161,19 @@
   const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
   (async () => {
-  const { data, error } = await sb.auth.getUser();
-  console.log("Current user email:", data?.user?.email || null);
-  console.log("Current user full:", data);
-  console.log("Current user error:", error);
-})();
+    const { data, error } = await sb.auth.getUser();
+    console.log("Current user email:", data?.user?.email || null);
+    console.log("Current user full:", data);
+    console.log("Current user error:", error);
+  })();
 
   async function getAccessToken() {
     const { data, error } = await sb.auth.getSession();
 
-console.log("Session user email:", data?.session?.user?.email || null);
-console.log("Session access token exists:", !!data?.session?.access_token);
-console.log("Session data:", data);
-console.log("Session error:", error);
+    console.log("Session user email:", data?.session?.user?.email || null);
+    console.log("Session access token exists:", !!data?.session?.access_token);
+    console.log("Session data:", data);
+    console.log("Session error:", error);
 
     if (error) {
       alert("Session error: " + error.message);
@@ -215,21 +215,26 @@ console.log("Session error:", error);
       const token = await getAccessToken();
       if (!token) return;
 
-      const { data, error } = await sb.functions.invoke("invite-user", {
+      const res = await fetch(`${SUPABASE_URL}/functions/v1/invite-user`, {
+        method: "POST",
         headers: {
-          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+          "apikey": SUPABASE_ANON_KEY,
+          "Authorization": `Bearer ${token}`,
         },
-        body: {
+        body: JSON.stringify({
           email,
           access_level: "Editor"
-        }
+        })
       });
 
-      console.log("Invite data:", data);
-      console.log("Invite error:", error);
+      const result = await res.json().catch(() => null);
 
-      if (error) {
-        setStatus(error.message || "Failed to send invite.", true);
+      console.log("HTTP status:", res.status);
+      console.log("Invite response body:", result);
+
+      if (!res.ok) {
+        setStatus(result?.error || `Failed to send invite (${res.status})`, true);
         return;
       }
 

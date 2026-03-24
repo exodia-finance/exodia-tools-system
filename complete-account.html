@@ -1,0 +1,321 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Complete Account</title>
+  <link rel="stylesheet" href="./css/styles.css" />
+  <style>
+    body{
+      font-family:"Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      background:#f5f6f8;
+      margin:0;
+    }
+
+    .complete-wrap{
+      max-width:760px;
+      margin:40px auto;
+      padding:0 16px;
+    }
+
+    .complete-card{
+      background:#fff;
+      border:1px solid #f0ddd0;
+      border-radius:18px;
+      box-shadow:0 12px 28px rgba(0,0,0,0.06);
+      padding:28px;
+    }
+
+    .complete-title{
+      font-family: Georgia, "Times New Roman", serif;
+      font-size:38px;
+      margin:0 0 8px;
+      color:#181818;
+    }
+
+    .complete-sub{
+      color:#666;
+      margin-bottom:22px;
+      font-size:14px;
+    }
+
+    .complete-grid{
+      display:grid;
+      gap:14px;
+      max-width:520px;
+    }
+
+    .complete-grid label{
+      display:grid;
+      gap:6px;
+      font-size:14px;
+      font-weight:600;
+      color:#333;
+    }
+
+    .complete-grid input{
+      width:100%;
+      padding:12px 14px;
+      border:1px solid #d8d8d8;
+      border-radius:10px;
+      font-size:14px;
+      box-sizing:border-box;
+      background:#fff;
+    }
+
+    .complete-grid input:focus{
+      outline:none;
+      border-color:#ff6a00;
+      box-shadow:0 0 0 4px rgba(255,106,0,0.12);
+    }
+
+    .password-row{
+      display:flex;
+      gap:10px;
+      align-items:center;
+    }
+
+    .password-row input{
+      flex:1;
+    }
+
+    .show-btn{
+      padding:12px 14px;
+      border:none;
+      border-radius:10px;
+      background:#fff4eb;
+      color:#8a420c;
+      border:1px solid #f0c3a1;
+      cursor:pointer;
+      font-weight:700;
+      font-size:13px;
+      white-space:nowrap;
+    }
+
+    .complete-actions{
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      margin-top:18px;
+    }
+
+    .complete-btn{
+      padding:12px 16px;
+      border:none;
+      border-radius:10px;
+      cursor:pointer;
+      font-weight:700;
+      font-size:14px;
+    }
+
+    .complete-btn.primary{
+      background:#ff6a00;
+      color:#fff;
+    }
+
+    .complete-btn.primary:hover{
+      background:#e45c00;
+    }
+
+    .complete-note{
+      margin-top:16px;
+      font-size:14px;
+      color:#555;
+      min-height:20px;
+    }
+
+    .email-box{
+      background:#fff8f2;
+      border:1px solid #f0ddd0;
+      padding:12px 14px;
+      border-radius:10px;
+      color:#333;
+      font-size:14px;
+    }
+  </style>
+</head>
+<body>
+  <div class="complete-wrap">
+    <div class="complete-card">
+      <h1 class="complete-title">Complete Your Account</h1>
+      <div class="complete-sub">
+        Finish setting up your account to access Exodia Finance.
+      </div>
+
+      <div class="complete-grid">
+        <label>
+          Email
+          <div id="user-email" class="email-box">Loading...</div>
+        </label>
+
+        <label>
+          Name
+          <input type="text" id="full-name" placeholder="Enter your name" />
+        </label>
+
+        <label>
+          Password
+          <div class="password-row">
+            <input type="password" id="password" placeholder="Create password" />
+            <button type="button" class="show-btn" onclick="togglePassword()">Show</button>
+          </div>
+        </label>
+      </div>
+
+      <div class="complete-actions">
+        <button class="complete-btn primary" onclick="completeAccount()">Complete Account</button>
+      </div>
+
+      <div id="complete-note" class="complete-note"></div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    const SUPABASE_URL = "https://vtglfaeyvmciieuntzhs.supabase.co";
+    const SUPABASE_ANON_KEY = "sb_publishable_E1idmqAS85V-IVFdOqqV_w_smrIsLuP";
+
+    const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    let invitedEmail = "";
+
+    function setNote(message, isError = false) {
+      const note = document.getElementById("complete-note");
+      note.textContent = message || "";
+      note.style.color = isError ? "crimson" : "#2b2b2b";
+    }
+
+    function togglePassword() {
+      const input = document.getElementById("password");
+      const button = document.querySelector(".show-btn");
+
+      if (input.type === "password") {
+        input.type = "text";
+        button.textContent = "Hide";
+      } else {
+        input.type = "password";
+        button.textContent = "Show";
+      }
+    }
+
+    async function loadInviteSession() {
+      try {
+        const hash = window.location.hash.startsWith("#")
+          ? window.location.hash.substring(1)
+          : "";
+        const params = new URLSearchParams(hash);
+
+        const access_token = params.get("access_token");
+        const refresh_token = params.get("refresh_token");
+
+        if (access_token && refresh_token) {
+          const { error } = await sb.auth.setSession({
+            access_token,
+            refresh_token
+          });
+
+          if (error) {
+            setNote("This invite link is invalid or expired.", true);
+            return false;
+          }
+        }
+
+        const { data, error } = await sb.auth.getUser();
+
+        if (error || !data?.user) {
+          setNote("Unable to load invited user. Please open the invite email link again.", true);
+          return false;
+        }
+
+        invitedEmail = data.user.email || "";
+        document.getElementById("user-email").textContent = invitedEmail || "No email found";
+
+        const existingName =
+          data.user.user_metadata?.full_name ||
+          data.user.user_metadata?.name ||
+          "";
+
+        if (existingName) {
+          document.getElementById("full-name").value = existingName;
+        }
+
+        return true;
+      } catch (err) {
+        console.error(err);
+        setNote("Unexpected error while loading invite.", true);
+        return false;
+      }
+    }
+
+    async function completeAccount() {
+      const fullName = document.getElementById("full-name").value.trim();
+      const password = document.getElementById("password").value;
+
+      if (!invitedEmail) {
+        setNote("Invited email not found. Please use the invite link from your email.", true);
+        return;
+      }
+
+      if (!fullName) {
+        setNote("Name is required.", true);
+        return;
+      }
+
+      if (!password || password.length < 6) {
+        setNote("Password must be at least 6 characters.", true);
+        return;
+      }
+
+      setNote("Saving your account...");
+
+      try {
+        const { data: updateData, error: updateError } = await sb.auth.updateUser({
+          password,
+          data: {
+            full_name: fullName,
+            name: fullName
+          }
+        });
+
+        if (updateError) {
+          setNote(updateError.message || "Failed to save account.", true);
+          return;
+        }
+
+        const userId = updateData?.user?.id || null;
+
+        if (userId) {
+          const { error: profileError } = await sb
+            .from("profiles")
+            .upsert(
+              [
+                {
+                  id: userId,
+                  email: invitedEmail,
+                  full_name: fullName
+                }
+              ],
+              { onConflict: "id" }
+            );
+
+          if (profileError) {
+            console.error("Profile upsert error:", profileError);
+          }
+        }
+
+        setNote("Account completed successfully. Redirecting to login...");
+
+        await sb.auth.signOut();
+
+        setTimeout(() => {
+          window.location.href = "./index.html";
+        }, 1500);
+      } catch (err) {
+        console.error(err);
+        setNote("Unexpected error while completing account.", true);
+      }
+    }
+
+    loadInviteSession();
+  </script>
+</body>
+</html>

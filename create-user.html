@@ -155,77 +155,77 @@
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script>
-    const SUPABASE_URL = "https://vtglfaeyvmciieuntzhs.supabase.co";
-    const SUPABASE_ANON_KEY = "YOUR_SUPABASE_ANON_KEY";
+  const SUPABASE_URL = "https://vtglfaeyvmciieuntzhs.supabase.co";
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ0Z2xmYWV5dm1jaWlldW50emhzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk2Nzg0NDUsImV4cCI6MjA4NTI1NDQ0NX0.eDOOS3BKKcNOJ_pq5-QpQkW6d1hpp2vdYPsvzzZgZzo";
 
-    const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    async function getAccessToken() {
-      const { data } = await sb.auth.getSession();
+  async function getAccessToken() {
+    const { data } = await sb.auth.getSession();
 
-      if (!data.session) {
-        alert("You are not logged in. Please login again.");
-        window.location.href = "./index.html";
-        return null;
-      }
-
-      return data.session.access_token;
-    }
-
-    function setStatus(msg, isError = false) {
-      const el = document.getElementById("mu-status");
-      if (!el) return;
-      el.textContent = msg || "";
-      el.style.color = isError ? "crimson" : "#2b2b2b";
-    }
-
-    function goBack() {
+    if (!data.session) {
+      alert("You are not logged in. Please login again.");
       window.location.href = "./index.html";
+      return null;
     }
 
-    async function sendInvite() {
-      const email = document.getElementById("mu-email").value.trim().toLowerCase();
+    return data.session.access_token;
+  }
 
-      if (!email) {
-        setStatus("Email is required.", true);
+  function setStatus(msg, isError = false) {
+    const el = document.getElementById("mu-status");
+    if (!el) return;
+    el.textContent = msg || "";
+    el.style.color = isError ? "crimson" : "#2b2b2b";
+  }
+
+  function goBack() {
+    window.location.href = "./index.html";
+  }
+
+  async function sendInvite() {
+    const email = document.getElementById("mu-email").value.trim().toLowerCase();
+
+    if (!email) {
+      setStatus("Email is required.", true);
+      return;
+    }
+
+    setStatus("Sending invite...");
+
+    try {
+      const token = await getAccessToken();
+      if (!token) return;
+
+      const res = await fetch(`${SUPABASE_URL}/functions/v1/invite-user`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
+          "apikey": SUPABASE_ANON_KEY
+        },
+        body: JSON.stringify({
+          email,
+          access_level: "Editor"
+        })
+      });
+
+      const result = await res.json();
+
+      if (!res.ok) {
+        setStatus(result.error || "Failed to send invite.", true);
+        console.log(result);
         return;
       }
 
-      setStatus("Sending invite...");
+      setStatus("✅ Invite sent successfully!");
+      document.getElementById("mu-email").value = "";
 
-      try {
-        const token = await getAccessToken();
-        if (!token) return;
-
-        const res = await fetch(`${SUPABASE_URL}/functions/v1/invite-user`, {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}`,
-            "apikey": SUPABASE_ANON_KEY
-          },
-          body: JSON.stringify({
-            email,
-            access_level: "Editor"
-          })
-        });
-
-        const result = await res.json();
-
-        if (!res.ok) {
-          setStatus(result.error || "Failed to send invite.", true);
-          console.log(result);
-          return;
-        }
-
-        setStatus("✅ Invite sent successfully!");
-        document.getElementById("mu-email").value = "";
-
-      } catch (err) {
-        setStatus(err.message || "Unexpected error.", true);
-        console.error(err);
-      }
+    } catch (err) {
+      setStatus(err.message || "Unexpected error.", true);
+      console.error(err);
     }
-  </script>
+  }
+</script>
 </body>
 </html>

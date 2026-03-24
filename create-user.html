@@ -160,14 +160,33 @@
 
   const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+(async () => {
+  const { data, error } = await sb.auth.getUser();
+  console.log("Current user:", data);
+  console.log("Current user error:", error);
+})();
+    
   async function getAccessToken() {
-    const { data } = await sb.auth.getSession();
+  const { data, error } = await sb.auth.getSession();
 
-    if (!data.session) {
-      alert("You are not logged in. Please login again.");
-      window.location.href = "./index.html";
-      return null;
-    }
+  console.log("Session data:", data);
+  console.log("Session error:", error);
+
+  if (error) {
+    alert("Session error: " + error.message);
+    window.location.href = "./index.html";
+    return null;
+  }
+
+  if (!data || !data.session || !data.session.access_token) {
+    alert("You are not logged in. Please login again.");
+    window.location.href = "./index.html";
+    return null;
+  }
+
+  console.log("Access token:", data.session.access_token);
+  return data.session.access_token;
+}
 
     return data.session.access_token;
   }

@@ -39,31 +39,42 @@ const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 // ==============================
 const $ = (id) => document.getElementById(id);
 
+let successMessageTimer = null;
+
 function showSuccessMessage(message) {
   let msgBox = document.getElementById("success-message");
 
   if (!msgBox) {
     msgBox = document.createElement("div");
     msgBox.id = "success-message";
-
-    msgBox.style.position = "fixed";
-    msgBox.style.top = "20px";
-    msgBox.style.right = "20px";
-    msgBox.style.background = "#28a745";
-    msgBox.style.color = "#fff";
-    msgBox.style.padding = "10px 16px";
-    msgBox.style.borderRadius = "6px";
-    msgBox.style.boxShadow = "0 2px 6px rgba(0,0,0,0.2)";
-    msgBox.style.zIndex = "9999";
-    msgBox.style.fontSize = "14px";
-
     document.body.appendChild(msgBox);
   }
 
   msgBox.textContent = message;
-  msgBox.style.display = "block";
 
-  setTimeout(() => {
+  msgBox.style.position = "fixed";
+  msgBox.style.top = "20px";
+  msgBox.style.right = "20px";
+  msgBox.style.background = "#28a745";
+  msgBox.style.color = "#ffffff";
+  msgBox.style.padding = "12px 18px";
+  msgBox.style.borderRadius = "8px";
+  msgBox.style.boxShadow = "0 4px 12px rgba(0,0,0,0.25)";
+  msgBox.style.zIndex = "999999";
+  msgBox.style.fontSize = "14px";
+  msgBox.style.fontWeight = "600";
+  msgBox.style.display = "block";
+  msgBox.style.opacity = "1";
+  msgBox.style.visibility = "visible";
+  msgBox.style.pointerEvents = "none";
+  msgBox.style.minWidth = "220px";
+  msgBox.style.textAlign = "center";
+
+  if (successMessageTimer) {
+    clearTimeout(successMessageTimer);
+  }
+
+  successMessageTimer = setTimeout(() => {
     msgBox.style.display = "none";
   }, 1000);
 }

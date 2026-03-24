@@ -5,6 +5,146 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Budget Tracker</title>
   <link rel="stylesheet" href="./css/styles.css" />
+  <style>
+    .budget-wrap {
+      padding: 20px;
+    }
+
+    .budget-card {
+      background: #fff;
+      border: 1px solid #ead7c3;
+      border-radius: 14px;
+      padding: 20px;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+
+    .budget-title {
+      margin: 0 0 12px 0;
+      font-size: 28px;
+      font-weight: 700;
+    }
+
+    .budget-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 14px;
+      margin-bottom: 18px;
+    }
+
+    .budget-field label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 6px;
+    }
+
+    .budget-field input,
+    .budget-field select,
+    .budget-field textarea {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #d6a067;
+      border-radius: 10px;
+      font-size: 14px;
+      box-sizing: border-box;
+      background: #fff;
+    }
+
+    .budget-field textarea {
+      min-height: 90px;
+      resize: vertical;
+    }
+
+    .budget-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-top: 16px;
+    }
+
+    .budget-btn {
+      border: 1px solid #d67d1f;
+      background: #ff7a00;
+      color: #fff;
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-weight: 700;
+      cursor: pointer;
+    }
+
+    .budget-btn.secondary {
+      background: #fffaf5;
+      color: #7a4a00;
+    }
+
+    .budget-table-wrap {
+      overflow-x: auto;
+      margin-top: 12px;
+    }
+
+    .budget-table {
+      width: 100%;
+      border-collapse: collapse;
+      background: #fff;
+    }
+
+    .budget-table th,
+    .budget-table td {
+      border: 1px solid #ead7c3;
+      padding: 10px;
+      text-align: left;
+    }
+
+    .budget-table th {
+      background: #141414;
+      color: #fff;
+    }
+
+    .budget-table input {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 8px 10px;
+      border: 1px solid #d6a067;
+      border-radius: 8px;
+    }
+
+    .budget-hidden {
+      display: none;
+    }
+
+    .budget-result-box {
+      border: 1px solid #ead7c3;
+      border-radius: 12px;
+      padding: 16px;
+      background: #fffaf5;
+      margin-bottom: 16px;
+    }
+
+    .budget-meta {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 10px;
+      margin: 12px 0 18px 0;
+    }
+
+    .budget-meta div {
+      background: #fff;
+      border: 1px solid #ead7c3;
+      border-radius: 10px;
+      padding: 10px 12px;
+    }
+
+    .budget-empty {
+      padding: 16px;
+      border: 1px dashed #d6a067;
+      border-radius: 12px;
+      background: #fffaf5;
+    }
+
+    .mini-link {
+      text-decoration: none;
+    }
+  </style>
 </head>
 <body>
 
@@ -24,21 +164,74 @@
 
     <nav class="sidebar-links">
       <a href="./index.html" onclick="closeSidebar()">Accounting Hub</a>
-      <a href="./budget.html" onclick="closeSidebar()">Budget Tracker</a>
+      <a href="#" onclick="showBudgetSection('create'); closeSidebar(); return false;">Create Budget</a>
+      <a href="#" onclick="showBudgetSection('results'); closeSidebar(); return false;">Budget Results</a>
     </nav>
   </aside>
 
-  <section style="padding:20px;">
-    <a href="./index.html" style="text-decoration:none;">← Back to Accounting Hub</a>
+  <section class="budget-wrap">
+    <a href="./index.html" class="mini-link">← Back to Accounting Hub</a>
   </section>
 
-  <section style="padding:20px;">
-    <h2>Budget Tracker</h2>
-    <p>This is your new budget page.</p>
-    <p>Next step: create budget form, budget list, and budget vs actual.</p>
+  <section id="budget-create-section" class="budget-wrap">
+    <div class="budget-card">
+      <h2 class="budget-title">Create Department Budget</h2>
+      <p>Create one budget for one department, then add that department’s expense items below.</p>
+
+      <div class="budget-grid">
+        <div class="budget-field">
+          <label for="budget-name">Budget Name</label>
+          <input id="budget-name" type="text" placeholder="Example: Marketing Budget 2026" />
+        </div>
+
+        <div class="budget-field">
+          <label for="budget-department">Department</label>
+          <input id="budget-department" type="text" placeholder="Example: Marketing Department" />
+        </div>
+
+        <div class="budget-field">
+          <label for="budget-year">Budget Year</label>
+          <input id="budget-year" type="number" placeholder="2026" />
+        </div>
+      </div>
+
+      <div class="budget-field">
+        <label for="budget-notes">Notes</label>
+        <textarea id="budget-notes" placeholder="Optional notes for this department budget"></textarea>
+      </div>
+
+      <div class="budget-table-wrap">
+        <table class="budget-table">
+          <thead>
+            <tr>
+              <th style="width: 55%;">Expense Name</th>
+              <th style="width: 30%;">Budget Amount</th>
+              <th style="width: 15%;">Action</th>
+            </tr>
+          </thead>
+          <tbody id="budget-lines-body"></tbody>
+        </table>
+      </div>
+
+      <div class="budget-actions">
+        <button class="budget-btn secondary" type="button" onclick="addBudgetLine()">+ Add Expense Line</button>
+        <button class="budget-btn" type="button" onclick="createBudgetResult()">Create Budget</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="budget-results-section" class="budget-wrap budget-hidden">
+    <div class="budget-card">
+      <h2 class="budget-title">Budget Results</h2>
+      <div id="budget-results-content" class="budget-empty">
+        No budget created yet.
+      </div>
+    </div>
   </section>
 
   <script>
+    let latestBudgetResult = null;
+
     function toggleSidebar() {
       const sidebar = document.getElementById("sidebar-menu");
       const overlay = document.getElementById("sidebar-overlay");
@@ -54,6 +247,145 @@
       sidebar.classList.remove("open");
       overlay.classList.remove("show");
     }
+
+    function showBudgetSection(section) {
+      const createSection = document.getElementById("budget-create-section");
+      const resultsSection = document.getElementById("budget-results-section");
+
+      if (section === "create") {
+        createSection.classList.remove("budget-hidden");
+        resultsSection.classList.add("budget-hidden");
+      } else {
+        createSection.classList.add("budget-hidden");
+        resultsSection.classList.remove("budget-hidden");
+      }
+    }
+
+    function formatMoney(value) {
+      return Number(value || 0).toLocaleString("en-US", {
+        minimumFractionDigits: 2,
+        maximumFractionDigits: 2
+      });
+    }
+
+    function addBudgetLine(expenseName = "", amount = "") {
+      const tbody = document.getElementById("budget-lines-body");
+      const tr = document.createElement("tr");
+
+      tr.innerHTML = `
+        <td>
+          <input type="text" class="budget-expense-name" placeholder="Example: Advertising & Marketing" value="${expenseName}">
+        </td>
+        <td>
+          <input type="number" class="budget-expense-amount" placeholder="0.00" step="0.01" min="0" value="${amount}">
+        </td>
+        <td>
+          <button type="button" class="budget-btn secondary" onclick="removeBudgetLine(this)">Remove</button>
+        </td>
+      `;
+
+      tbody.appendChild(tr);
+    }
+
+    function removeBudgetLine(btn) {
+      const row = btn.closest("tr");
+      if (row) row.remove();
+    }
+
+    function createBudgetResult() {
+      const budgetName = document.getElementById("budget-name").value.trim();
+      const department = document.getElementById("budget-department").value.trim();
+      const year = document.getElementById("budget-year").value.trim();
+      const notes = document.getElementById("budget-notes").value.trim();
+
+      if (!budgetName || !department || !year) {
+        alert("Please fill in Budget Name, Department, and Budget Year.");
+        return;
+      }
+
+      const rows = [...document.querySelectorAll("#budget-lines-body tr")];
+      const lines = rows.map(row => {
+        const expenseName = row.querySelector(".budget-expense-name")?.value.trim() || "";
+        const amount = parseFloat(row.querySelector(".budget-expense-amount")?.value || "0");
+
+        return {
+          expenseName,
+          amount
+        };
+      }).filter(line => line.expenseName && line.amount > 0);
+
+      if (!lines.length) {
+        alert("Please add at least one expense line with amount.");
+        return;
+      }
+
+      const total = lines.reduce((sum, line) => sum + Number(line.amount || 0), 0);
+
+      latestBudgetResult = {
+        budgetName,
+        department,
+        year,
+        notes,
+        lines,
+        total
+      };
+
+      renderBudgetResult();
+      showBudgetSection("results");
+    }
+
+    function renderBudgetResult() {
+      const box = document.getElementById("budget-results-content");
+
+      if (!latestBudgetResult) {
+        box.innerHTML = "No budget created yet.";
+        return;
+      }
+
+      const result = latestBudgetResult;
+
+      const linesHtml = result.lines.map(line => `
+        <tr>
+          <td>${line.expenseName}</td>
+          <td>${formatMoney(line.amount)}</td>
+        </tr>
+      `).join("");
+
+      box.innerHTML = `
+        <div class="budget-result-box">
+          <h3 style="margin-top:0;">${result.budgetName}</h3>
+
+          <div class="budget-meta">
+            <div><strong>Department:</strong><br>${result.department}</div>
+            <div><strong>Year:</strong><br>${result.year}</div>
+            <div><strong>Total Budget:</strong><br>${formatMoney(result.total)}</div>
+          </div>
+
+          <div style="margin-bottom:16px;">
+            <strong>Notes:</strong><br>
+            ${result.notes || "-"}
+          </div>
+
+          <div class="budget-table-wrap">
+            <table class="budget-table">
+              <thead>
+                <tr>
+                  <th>Expense Name</th>
+                  <th>Budget Amount</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${linesHtml}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      `;
+    }
+
+    addBudgetLine("Advertising & Marketing", "");
+    addBudgetLine("Meals & Entertainment", "");
+    addBudgetLine("Transportation", "");
   </script>
 
 </body>

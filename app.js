@@ -3958,7 +3958,7 @@ window.addAccountPopup = async function () {
   if (!normal) return;
 
   try {
-   await sbInsertCOA({
+   await sbCreateOrRestoreCOA({
   user_id: currentUser.id,
   company_id: COMPANY_ID,
   created_by: currentUser.id,
@@ -3980,10 +3980,15 @@ window.addAccountPopup = async function () {
     renderLedger();
     renderTrialBalance();
 
-    alert("✅ Account added successfully!");
+    showSuccessMessage("✅ Account added successfully!");
   } catch (e) {
     console.error(e);
-    alert("❌ Failed to add account (maybe duplicate code).");
+    if (e?.code === "23505" || e?.code === "DUPLICATE_ACTIVE_CODE") {
+  alert(`❌ Code ${code} already exists.`);
+  return;
+}
+
+alert("❌ Failed to add account.");
   }
 };
 
@@ -4055,6 +4060,7 @@ window.saveAddCoaModal = async function () {
 
     $("addcoa-msg").textContent = "";
     closeAddCoaModal();
+    showSuccessMessage("✅ Account added successfully!");
   } catch (e) {
     console.error(e);
 

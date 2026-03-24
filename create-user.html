@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Manage Accounts</title>
+  <title>Invite User</title>
   <link rel="stylesheet" href="./css/styles.css" />
   <style>
     body{
@@ -132,33 +132,20 @@
 <body>
   <div class="manage-wrap">
     <div class="manage-card">
-      <h1>Create User</h1>
+      <h1>Invite User</h1>
       <div class="manage-sub">
-        Create a new user account for your ledger system.
+        Send an email invitation so the user can create their own account.
       </div>
 
       <div class="manage-grid">
-        <div class="manage-field">
-          <label for="mu-first-name">First Name</label>
-          <input id="mu-first-name" type="text" placeholder="Jethel Grace">
-        </div>
-
-        <div class="manage-field">
-          <label for="mu-last-name">Last Name</label>
-          <input id="mu-last-name" type="text" placeholder="Oncines">
-        </div>
-
         <div class="manage-field full">
           <label for="mu-email">Email *</label>
           <input id="mu-email" type="email" placeholder="user@email.com">
         </div>
-
-        <div class="manage-field full">
-        </div>
       </div>
 
       <div class="manage-actions">
-        <button class="manage-btn primary" onclick="createManagedUser()">Create User</button>
+        <button class="manage-btn primary" onclick="sendInvite()">Send Invite</button>
         <button class="manage-btn secondary" onclick="goBack()">Back</button>
       </div>
 
@@ -167,88 +154,78 @@
   </div>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script>
-const SUPABASE_URL = "https://vtglfaeyvmciieuntzhs.supabase.co";
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZ0Z2xmYWV5dm1jaWlldW50emhzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njk2Nzg0NDUsImV4cCI6MjA4NTI1NDQ0NX0.eDOOS3BKKcNOJ_pq5-QpQkW6d1hpp2vdYPsvzzZgZzo";
+  <script>
+    const SUPABASE_URL = "https://vtglfaeyvmciieuntzhs.supabase.co";
+    const SUPABASE_ANON_KEY = "YOUR_SUPABASE_ANON_KEY";
 
-const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// check login + get token
-async function getAccessToken() {
-  const { data } = await sb.auth.getSession();
+    async function getAccessToken() {
+      const { data } = await sb.auth.getSession();
 
-  if (!data.session) {
-    alert("You are not logged in. Please login again.");
-    window.location.href = "./index.html";
-    return null;
-  }
+      if (!data.session) {
+        alert("You are not logged in. Please login again.");
+        window.location.href = "./index.html";
+        return null;
+      }
 
-  return data.session.access_token;
-}
-
-// status message
-function setStatus(msg, isError = false) {
-  const el = document.getElementById("mu-status");
-  if (!el) return;
-  el.textContent = msg || "";
-  el.style.color = isError ? "crimson" : "#2b2b2b";
-}
-
-// back button
-function goBack() {
-  window.location.href = "./index.html";
-}
-
-// main function
-async function createManagedUser() {
-  const first_name = document.getElementById("mu-first-name").value.trim();
-  const last_name = document.getElementById("mu-last-name").value.trim();
-  const email = document.getElementById("mu-email").value.trim();
-
-  if (!email) {
-    setStatus("Email is required.", true);
-    return;
-  }
-
-  setStatus("Sending invite...");
-
-  try {
-    const token = await getAccessToken();
-    if (!token) return;
-
-    const res = await fetch(`${SUPABASE_URL}/functions/v1/invite-user`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${token}`
-      },
-      body: JSON.stringify({
-        email,
-        first_name,
-        last_name,
-        access_level: "Editor"
-      })
-    });
-
-    const result = await res.json();
-
-    if (!res.ok) {
-      setStatus(result.error || "Failed to send invite.", true);
-      console.log(result);
-      return;
+      return data.session.access_token;
     }
 
-    setStatus("✅ Invite sent successfully!");
+    function setStatus(msg, isError = false) {
+      const el = document.getElementById("mu-status");
+      if (!el) return;
+      el.textContent = msg || "";
+      el.style.color = isError ? "crimson" : "#2b2b2b";
+    }
 
-    document.getElementById("mu-first-name").value = "";
-    document.getElementById("mu-last-name").value = "";
-    document.getElementById("mu-email").value = "";
+    function goBack() {
+      window.location.href = "./index.html";
+    }
 
-  } catch (err) {
-    setStatus(err.message || "Unexpected error.", true);
-    console.error(err);
-  }
-}
-</script>
+    async function sendInvite() {
+      const email = document.getElementById("mu-email").value.trim().toLowerCase();
+
+      if (!email) {
+        setStatus("Email is required.", true);
+        return;
+      }
+
+      setStatus("Sending invite...");
+
+      try {
+        const token = await getAccessToken();
+        if (!token) return;
+
+        const res = await fetch(`${SUPABASE_URL}/functions/v1/invite-user`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${token}`,
+            "apikey": SUPABASE_ANON_KEY
+          },
+          body: JSON.stringify({
+            email,
+            access_level: "Editor"
+          })
+        });
+
+        const result = await res.json();
+
+        if (!res.ok) {
+          setStatus(result.error || "Failed to send invite.", true);
+          console.log(result);
+          return;
+        }
+
+        setStatus("✅ Invite sent successfully!");
+        document.getElementById("mu-email").value = "";
+
+      } catch (err) {
+        setStatus(err.message || "Unexpected error.", true);
+        console.error(err);
+      }
+    }
+  </script>
 </body>
 </html>

@@ -342,22 +342,53 @@ async function setUserStatus(userId, newStatus) {
   loadUsers();
 }
 
-async function removeUser(userId) {
-  const ok = confirm("Remove this user from user access list?");
-  if (!ok) return;
+async function removeUser(user) {
+  const confirmed = confirm(
+    "Delete this account permanently?\n\n" +
+    "This will remove the user’s access and permanently delete the account from the system.\n" +
+    "The user will no longer be able to sign in, and this account will no longer be found in Exodia Finance.\n" +
+    "If they need access again, you will need to invite them again.\n\n" +
+    "This action cannot be undone."
+  );
 
-  const { error } = await sb
-    .from("user_access")
-    .delete()
-    .eq("id", userId);
+  if (!confirmed) return;
 
-  if (error) {
-    alert(error.message || "Failed to remove user.");
-    return;
+  try {
+    const {
+      data: { session },
+      error: sessionError
+    } = await sb.auth.getSession();
+
+    if (sessionError || !session?.access_token) {
+      alert("You must be logged in as admin to delete a user.");
+      return;
+    }
+
+    const res = await fetch("https://vtglfaeyvmciieuntzhs.supabase.co/functions/v1/delete-user", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${session.access_token}`
+      },
+      body: JSON.stringify({
+        auth_user_id: user.auth_user_id,
+        email: user.email
+      })
+    });
+
+    const payload = await res.json();
+
+    if (!res.ok) {
+      alert(payload.error || "Failed to delete user.");
+      return;
+    }
+
+    alert("User account permanently deleted.");
+    await loadUsers();
+  } catch (err) {
+    console.error(err);
+    alert("Unexpected error while deleting user.");
   }
-
-  closeAllUserMenus();
-  loadUsers();
 }
 
     loadUsers();

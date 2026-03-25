@@ -573,7 +573,7 @@ async function initializeBudgetPage() {
       grandTotal
     };
 
-    renderBudgetResult();
+    renderBudgetResults();
     showBudgetSection("results");
     alert("✅ Budget saved successfully!");
   } catch (err) {
@@ -611,6 +611,64 @@ async function initializeBudgetPage() {
   if (linesError) throw linesError;
 
   return budgetRow;
+}
+
+    function renderBudgetResults() {
+  const box = document.getElementById("budget-results-content");
+
+  if (!latestBudgetResult) {
+    box.innerHTML = "No budget created yet.";
+    return;
+  }
+
+  const r = latestBudgetResult;
+
+  const bodyHtml = r.groupBudgets.map(item => `
+    <tr>
+      <td>${escapeHtml(item.group)}</td>
+      <td style="text-align:right;">${formatMoney(item.amount)}</td>
+      <td>
+        <button type="button" class="budget-btn secondary" onclick="openDetailsPanel('${escapeJs(item.group)}')">View Details</button>
+      </td>
+    </tr>
+  `).join("");
+
+  box.innerHTML = `
+    <div class="budget-result-box">
+      <h3 style="margin-top:0;">${escapeHtml(r.budgetName)}</h3>
+
+      <div class="budget-meta">
+        <div><strong>Year:</strong><br>${escapeHtml(r.budgetYear)}</div>
+        <div><strong>Frequency:</strong><br>${escapeHtml(r.frequency)}</div>
+        <div><strong>Grand Total:</strong><br>${formatMoney(r.grandTotal)}</div>
+      </div>
+
+      <div style="margin-bottom:16px;">
+        <strong>Notes:</strong><br>
+        ${escapeHtml(r.notes || "-")}
+      </div>
+
+      <div class="budget-table-wrap">
+        <table class="budget-table">
+          <thead>
+            <tr>
+              <th>Department / Group</th>
+              <th>Budget Amount</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${bodyHtml}
+            <tr class="period-total-row">
+              <td>Grand Total</td>
+              <td style="text-align:right;">${formatMoney(r.grandTotal)}</td>
+              <td></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  `;
 }
 
     function escapeHtml(value) {

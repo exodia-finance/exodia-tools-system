@@ -251,26 +251,36 @@
       </p>
 
       <div class="budget-grid">
-        <div class="budget-field">
-          <label for="budget-name">Budget Name</label>
-          <input id="budget-name" type="text" placeholder="Example: Annual Budget 2026" />
-        </div>
+  <div class="budget-field">
+    <label for="budget-name">Budget Name</label>
+    <input id="budget-name" type="text" placeholder="Example: Annual Budget 2026" />
+  </div>
 
-        <div class="budget-field">
-          <label for="budget-year">Budget Year</label>
-          <input id="budget-year" type="number" placeholder="2026" />
-        </div>
+  <div class="budget-field">
+    <label for="budget-year">Budget Year</label>
+    <input id="budget-year" type="number" placeholder="2026" />
+  </div>
 
-        <div class="budget-field">
-          <label for="budget-frequency">Frequency</label>
-          <select id="budget-frequency">
-            <option value="Monthly">Monthly</option>
-            <option value="Quarterly">Quarterly</option>
-            <option value="Semi-Annual">Semi-Annual</option>
-            <option value="Yearly">Yearly</option>
-          </select>
-        </div>
-      </div>
+  <div class="budget-field">
+    <label for="budget-frequency">Frequency</label>
+    <select id="budget-frequency" onchange="autoSetEndDate()">
+      <option value="Monthly">Monthly</option>
+      <option value="Quarterly">Quarterly</option>
+      <option value="Semi-Annual">Semi-Annual</option>
+      <option value="Yearly">Yearly</option>
+    </select>
+  </div>
+
+  <div class="budget-field">
+    <label for="budget-start-date">Start Date</label>
+    <input id="budget-start-date" type="date" onchange="autoSetEndDate()" />
+  </div>
+
+  <div class="budget-field">
+    <label for="budget-end-date">End Date</label>
+    <input id="budget-end-date" type="date" />
+  </div>
+</div>
 
       <div class="budget-field">
         <label for="budget-notes">Notes</label>
@@ -456,6 +466,50 @@ async function initializeBudgetPage() {
       });
     }
 
+    function addMonths(date, months) {
+  const d = new Date(date);
+  const day = d.getDate();
+
+  d.setMonth(d.getMonth() + months);
+
+  if (d.getDate() < day) {
+    d.setDate(0);
+  }
+
+  return d;
+}
+
+function formatDateForInput(date) {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+}
+
+function autoSetEndDate() {
+  const startInput = document.getElementById("budget-start-date");
+  const endInput = document.getElementById("budget-end-date");
+  const frequency = document.getElementById("budget-frequency").value;
+
+  if (!startInput || !endInput || !startInput.value) return;
+
+  const startDate = new Date(startInput.value + "T00:00:00");
+  let endDate = new Date(startDate);
+
+  if (frequency === "Monthly") {
+    endDate = addMonths(startDate, 1);
+  } else if (frequency === "Quarterly") {
+    endDate = addMonths(startDate, 3);
+  } else if (frequency === "Semi-Annual") {
+    endDate = addMonths(startDate, 6);
+  } else if (frequency === "Yearly") {
+    endDate = addMonths(startDate, 12);
+  }
+
+  endDate.setDate(endDate.getDate() - 1);
+  endInput.value = formatDateForInput(endDate);
+}
+
     function renderDepartmentBudgetRows() {
       const tbody = document.getElementById("department-budget-body");
       tbody.innerHTML = "";
@@ -526,15 +580,17 @@ async function initializeBudgetPage() {
     }
 
     async function createBudgetResult() {
-  const budgetName = document.getElementById("budget-name").value.trim();
-  const budgetYear = document.getElementById("budget-year").value.trim();
-  const frequency = document.getElementById("budget-frequency").value;
-  const notes = document.getElementById("budget-notes").value.trim();
+ const budgetName = document.getElementById("budget-name").value.trim();
+const budgetYear = document.getElementById("budget-year").value.trim();
+const frequency = document.getElementById("budget-frequency").value;
+const startDate = document.getElementById("budget-start-date").value;
+const endDate = document.getElementById("budget-end-date").value;
+const notes = document.getElementById("budget-notes").value.trim();
 
-  if (!budgetName || !budgetYear) {
-    alert("Please fill in Budget Name and Budget Year.");
-    return;
-  }
+  if (!budgetName || !budgetYear || !startDate || !endDate) {
+  alert("Please fill in Budget Name, Budget Year, Start Date, and End Date.");
+  return;
+}
 
   const groupBudgets = BUDGET_GROUPS.map((group, index) => {
     const input = document.querySelector(`.department-budget-input[data-group-index="${index}"]`);
@@ -556,22 +612,26 @@ async function initializeBudgetPage() {
 
   try {
     const savedBudget = await saveBudgetToSupabase({
-      budgetName,
-      budgetYear: Number(budgetYear),
-      frequency,
-      notes,
-      groupBudgets
-    });
+  budgetName,
+  budgetYear: Number(budgetYear),
+  frequency,
+  startDate,
+  endDate,
+  notes,
+  groupBudgets
+});
 
     latestBudgetResult = {
-      id: savedBudget.id,
-      budgetName,
-      budgetYear,
-      frequency,
-      notes,
-      groupBudgets,
-      grandTotal
-    };
+  id: savedBudget.id,
+  budgetName,
+  budgetYear,
+  frequency,
+  startDate,
+  endDate,
+  notes,
+  groupBudgets,
+  grandTotal
+};
 
     renderBudgetResults();
     showBudgetSection("results");
@@ -582,17 +642,20 @@ async function initializeBudgetPage() {
   }
 }
 
-    async function saveBudgetToSupabase({ budgetName, budgetYear, frequency, notes, groupBudgets }) {
+    async function saveBudgetToSupabase({ budgetName, budgetYear, frequency, startDate, endDate, notes, groupBudgets }) {
   if (!sb) throw new Error("Supabase is not initialized.");
 
   const { data: budgetRow, error: budgetError } = await sb
     .from("budgets")
     .insert([{
-      budget_name: budgetName,
-      budget_year: budgetYear,
-      frequency: frequency,
-      notes: notes || null
-    }])
+  budget_name: budgetName,
+  budget_year: budgetYear,
+  frequency: frequency,
+  start_date: startDate,
+  end_date: endDate,
+  notes: notes || null
+}])
+    
     .select("id")
     .single();
 
@@ -639,8 +702,10 @@ async function initializeBudgetPage() {
 
       <div class="budget-meta">
         <div><strong>Year:</strong><br>${escapeHtml(r.budgetYear)}</div>
-        <div><strong>Frequency:</strong><br>${escapeHtml(r.frequency)}</div>
-        <div><strong>Grand Total:</strong><br>${formatMoney(r.grandTotal)}</div>
+<div><strong>Frequency:</strong><br>${escapeHtml(r.frequency)}</div>
+<div><strong>Start Date:</strong><br>${escapeHtml(r.startDate || "-")}</div>
+<div><strong>End Date:</strong><br>${escapeHtml(r.endDate || "-")}</div>
+<div><strong>Grand Total:</strong><br>${formatMoney(r.grandTotal)}</div>
       </div>
 
       <div style="margin-bottom:16px;">
@@ -686,6 +751,8 @@ async function initializeBudgetPage() {
         .replace(/'/g, "\\'");
     }
 
+    document.getElementById("budget-start-date").value = formatDateForInput(new Date());
+autoSetEndDate();
     initializeBudgetPage();
   </script>
 

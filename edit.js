@@ -361,10 +361,10 @@ async function saveChanges(journalId, userId) {
     .eq("company_id", COMPANY_ID);
 
   if (headErr) {
-    console.error(headErr);
-    setStatus("Header update failed (RLS/policy).", true);
-    return;
-  }
+  console.error(headErr);
+  setStatus(`Header update failed: ${headErr.message || "Unknown error"}`, true);
+  return;
+}
 
   const { error: delErr } = await sb
   .from("journal_lines")
@@ -402,11 +402,11 @@ async function saveChanges(journalId, userId) {
 
   const { error: insErr } = await sb.from("journal_lines").insert(fresh);
 
-  if (insErr) {
-    console.error(insErr);
-    setStatus("Insert failed (RLS/policy).", true);
-    return;
-  }
+  if (headErr) {
+  console.error(headErr);
+  setStatus(`Header update failed: ${headErr.message || "Unknown error"}`, true);
+  return;
+}
 
   setStatus("Journal entry updated successfully ✅");
 

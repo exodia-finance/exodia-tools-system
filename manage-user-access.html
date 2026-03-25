@@ -360,30 +360,33 @@ async function removeUser(authUserId, email) {
 
   try {
     const {
-      data: { session },
-      error: sessionError
-    } = await sb.auth.getSession();
+  data: refreshData,
+  error: refreshError
+} = await sb.auth.refreshSession();
 
-    console.log("Session check:", { session, sessionError });
-    console.log("Deleting user:", { authUserId, email });
+const session = refreshData?.session || null;
 
-    if (sessionError || !session?.access_token) {
-      alert("You must be logged in as admin to delete a user.");
-      return;
-    }
+console.log("Refresh session:", { session, refreshError });
+console.log("Deleting user:", { authUserId, email });
+
+if (refreshError || !session?.access_token) {
+  alert("Your session expired or is invalid. Please log in again.");
+  window.location.href = "./index.html";
+  return;
+}
 
     const res = await fetch("https://vtglfaeyvmciieuntzhs.supabase.co/functions/v1/delete-user", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${session.access_token}`
-      },
-      body: JSON.stringify({
-        auth_user_id: authUserId,
-        email: email
-      })
-    });
-
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json",
+    "Authorization": `Bearer ${session.access_token}`
+  },
+  body: JSON.stringify({
+    auth_user_id: authUserId,
+    email: email
+  })
+});
+    
     const payload = await res.json();
     console.log("Delete response:", payload);
 

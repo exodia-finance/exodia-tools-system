@@ -364,6 +364,9 @@ async function removeUser(authUserId, email) {
       error: sessionError
     } = await sb.auth.getSession();
 
+    console.log("Session check:", { session, sessionError });
+    console.log("Deleting user:", { authUserId, email });
+
     if (sessionError || !session?.access_token) {
       alert("You must be logged in as admin to delete a user.");
       return;
@@ -382,9 +385,10 @@ async function removeUser(authUserId, email) {
     });
 
     const payload = await res.json();
+    console.log("Delete response:", payload);
 
     if (!res.ok) {
-      alert(payload.error || "Failed to delete user.");
+      alert(payload.error || payload.message || "Failed to delete user.");
       return;
     }
 

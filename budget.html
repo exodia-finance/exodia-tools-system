@@ -7,29 +7,29 @@
 <link rel="stylesheet" href="./css/styles.css" />
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
-    .budget-wrap { padding: 20px; }
+    .budget-wrap { padding: 12px 20px; }
 
     .budget-card {
-      background: #fff;
-      border: 1px solid #ead7c3;
-      border-radius: 14px;
-      padding: 20px;
-      margin-bottom: 20px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-    }
-
+  background: #fff;
+  border: 1px solid #ead7c3;
+  border-radius: 14px;
+  padding: 16px;
+  margin-bottom: 14px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+  
     .budget-title {
-      margin: 0 0 12px 0;
-      font-size: 28px;
-      font-weight: 700;
-    }
+  margin: 0 0 8px 0;
+  font-size: 24px;
+  font-weight: 700;
+}
 
     .budget-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-      gap: 14px;
-      margin-bottom: 18px;
-    }
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+  margin-bottom: 12px;
+}
 
     .budget-field label {
       display: block;
@@ -55,15 +55,14 @@
     }
 
     .budget-top-menu {
-      margin-bottom: 8px;
-    }
-
+  margin-bottom: 2px;
+}
     .budget-actions {
-      display: flex;
-      gap: 10px;
-      flex-wrap: wrap;
-      margin-top: 16px;
-    }
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 12px;
+}
 
     .budget-btn {
       border: 1px solid #d67d1f;
@@ -111,13 +110,21 @@
     }
 
     .budget-table input {
-      width: 100%;
-      box-sizing: border-box;
-      padding: 8px 10px;
-      border: 1px solid #d6a067;
-      border-radius: 8px;
-      text-align: right;
-    }
+  width: 100%;
+  box-sizing: border-box;
+  padding: 8px 10px;
+  border: 1px solid #d6a067;
+  border-radius: 8px;
+  text-align: right;
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+
+.budget-table input::-webkit-outer-spin-button,
+.budget-table input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
 
     .budget-muted {
       color: #666;

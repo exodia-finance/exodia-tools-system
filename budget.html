@@ -525,105 +525,93 @@ async function initializeBudgetPage() {
       panel.classList.remove("show");
     }
 
-    function createBudgetResult() {
-      const budgetName = document.getElementById("budget-name").value.trim();
-      const budgetYear = document.getElementById("budget-year").value.trim();
-      const frequency = document.getElementById("budget-frequency").value;
-      const notes = document.getElementById("budget-notes").value.trim();
+    async function createBudgetResult() {
+  const budgetName = document.getElementById("budget-name").value.trim();
+  const budgetYear = document.getElementById("budget-year").value.trim();
+  const frequency = document.getElementById("budget-frequency").value;
+  const notes = document.getElementById("budget-notes").value.trim();
 
-      if (!budgetName || !budgetYear) {
-        alert("Please fill in Budget Name and Budget Year.");
-        return;
-      }
+  if (!budgetName || !budgetYear) {
+    alert("Please fill in Budget Name and Budget Year.");
+    return;
+  }
 
-      const groupBudgets = BUDGET_GROUPS.map((group, index) => {
-        const input = document.querySelector(`.department-budget-input[data-group-index="${index}"]`);
-        const amount = Number(input?.value || 0);
+  const groupBudgets = BUDGET_GROUPS.map((group, index) => {
+    const input = document.querySelector(`.department-budget-input[data-group-index="${index}"]`);
+    const amount = Number(input?.value || 0);
 
-        return {
-          group,
-          amount,
-          details: DEPARTMENT_DETAILS[group] || []
-        };
-      }).filter(item => item.amount > 0);
+    return {
+      group,
+      amount,
+      details: DEPARTMENT_DETAILS[group] || []
+    };
+  }).filter(item => item.amount > 0);
 
-      if (!groupBudgets.length) {
-        alert("Please enter at least one department/group budget amount.");
-        return;
-      }
+  if (!groupBudgets.length) {
+    alert("Please enter at least one department/group budget amount.");
+    return;
+  }
 
-      const grandTotal = groupBudgets.reduce((sum, item) => sum + Number(item.amount || 0), 0);
+  const grandTotal = groupBudgets.reduce((sum, item) => sum + Number(item.amount || 0), 0);
 
-      latestBudgetResult = {
-        budgetName,
-        budgetYear,
-        frequency,
-        notes,
-        groupBudgets,
-        grandTotal
-      };
+  try {
+    const savedBudget = await saveBudgetToSupabase({
+      budgetName,
+      budgetYear: Number(budgetYear),
+      frequency,
+      notes,
+      groupBudgets
+    });
 
-      renderBudgetResult();
-      showBudgetSection("results");
-    }
+    latestBudgetResult = {
+      id: savedBudget.id,
+      budgetName,
+      budgetYear,
+      frequency,
+      notes,
+      groupBudgets,
+      grandTotal
+    };
 
-    function renderBudgetResult() {
-      const box = document.getElementById("budget-results-content");
+    renderBudgetResult();
+    showBudgetSection("results");
+    alert("✅ Budget saved successfully!");
+  } catch (err) {
+    console.error("Failed to save budget:", err);
+    alert("❌ Failed to save budget.");
+  }
+}
 
-      if (!latestBudgetResult) {
-        box.innerHTML = "No budget created yet.";
-        return;
-      }
+    async function saveBudgetToSupabase({ budgetName, budgetYear, frequency, notes, groupBudgets }) {
+  if (!sb) throw new Error("Supabase is not initialized.");
 
-      const r = latestBudgetResult;
+  const { data: budgetRow, error: budgetError } = await sb
+    .from("budgets")
+    .insert([{
+      budget_name: budgetName,
+      budget_year: budgetYear,
+      frequency: frequency,
+      notes: notes || null
+    }])
+    .select("id")
+    .single();
 
-      const bodyHtml = r.groupBudgets.map(item => `
-        <tr>
-          <td>${escapeHtml(item.group)}</td>
-          <td style="text-align:right;">${formatMoney(item.amount)}</td>
-          <td>
-            <button type="button" class="budget-btn secondary" onclick="openDetailsPanel('${escapeJs(item.group)}')">View Details</button>
-          </td>
-        </tr>
-      `).join("");
+  if (budgetError) throw budgetError;
 
-      box.innerHTML = `
-        <div class="budget-result-box">
-          <h3 style="margin-top:0;">${escapeHtml(r.budgetName)}</h3>
+  const lineRows = groupBudgets.map(item => ({
+    budget_id: budgetRow.id,
+    group_name: item.group,
+    amount: Number(item.amount || 0)
+  }));
 
-          <div class="budget-meta">
-            <div><strong>Year:</strong><br>${escapeHtml(r.budgetYear)}</div>
-            <div><strong>Frequency:</strong><br>${escapeHtml(r.frequency)}</div>
-            <div><strong>Grand Total:</strong><br>${formatMoney(r.grandTotal)}</div>
-          </div>
+  const { error: linesError } = await sb
+    .from("budget_lines")
+    .insert(lineRows);
 
-          <div style="margin-bottom:16px;">
-            <strong>Notes:</strong><br>
-            ${escapeHtml(r.notes || "-")}
-          </div>
+  if (linesError) throw linesError;
 
-          <div class="budget-table-wrap">
-            <table class="budget-table">
-              <thead>
-                <tr>
-                  <th>Department / Group</th>
-                  <th>Budget Amount</th>
-                  <th>Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                ${bodyHtml}
-                <tr class="period-total-row">
-                  <td>Grand Total</td>
-                  <td style="text-align:right;">${formatMoney(r.grandTotal)}</td>
-                  <td></td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-        </div>
-      `;
-    }
+  return budgetRow;
+}
 
     function escapeHtml(value) {
       return String(value ?? "")

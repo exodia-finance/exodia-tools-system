@@ -6,10 +6,7 @@
   <title>Budget Tracker</title>
   <link rel="stylesheet" href="./css/styles.css" />
   <style>
-    .budget-wrap {
-      padding: 20px;
-    }
-
+    .budget-wrap { padding: 20px; }
     .budget-card {
       background: #fff;
       border: 1px solid #ead7c3;
@@ -18,26 +15,22 @@
       margin-bottom: 20px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.04);
     }
-
     .budget-title {
       margin: 0 0 12px 0;
       font-size: 28px;
       font-weight: 700;
     }
-
     .budget-grid {
       display: grid;
       grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
       gap: 14px;
       margin-bottom: 18px;
     }
-
     .budget-field label {
       display: block;
       font-weight: 600;
       margin-bottom: 6px;
     }
-
     .budget-field input,
     .budget-field select,
     .budget-field textarea {
@@ -49,11 +42,11 @@
       box-sizing: border-box;
       background: #fff;
     }
-
     .budget-field textarea {
       min-height: 90px;
       resize: vertical;
     }
+    .budget-top-menu { margin-bottom: 8px; }
 
     .budget-actions {
       display: flex;
@@ -61,7 +54,6 @@
       flex-wrap: wrap;
       margin-top: 16px;
     }
-
     .budget-btn {
       border: 1px solid #d67d1f;
       background: #ff7a00;
@@ -71,45 +63,54 @@
       font-weight: 700;
       cursor: pointer;
     }
-
     .budget-btn.secondary {
       background: #fffaf5;
       color: #7a4a00;
     }
 
+    .budget-hidden { display: none; }
+
     .budget-table-wrap {
       overflow-x: auto;
       margin-top: 12px;
     }
-
     .budget-table {
       width: 100%;
       border-collapse: collapse;
       background: #fff;
+      min-width: 860px;
     }
-
     .budget-table th,
     .budget-table td {
       border: 1px solid #ead7c3;
       padding: 10px;
       text-align: left;
+      vertical-align: middle;
     }
-
     .budget-table th {
       background: #141414;
       color: #fff;
+      white-space: nowrap;
     }
-
     .budget-table input {
       width: 100%;
       box-sizing: border-box;
       padding: 8px 10px;
       border: 1px solid #d6a067;
       border-radius: 8px;
+      text-align: right;
     }
 
-    .budget-hidden {
-      display: none;
+    .budget-muted {
+      color: #666;
+      font-size: 13px;
+    }
+
+    .budget-empty {
+      padding: 16px;
+      border: 1px dashed #d6a067;
+      border-radius: 12px;
+      background: #fffaf5;
     }
 
     .budget-result-box {
@@ -134,20 +135,14 @@
       padding: 10px 12px;
     }
 
-    .budget-empty {
-      padding: 16px;
-      border: 1px dashed #d6a067;
-      border-radius: 12px;
-      background: #fffaf5;
-    }
-
     .mini-link {
       text-decoration: none;
     }
 
-    .budget-top-menu {
-  margin-bottom: 6px;
-}
+    .period-total-row td {
+      font-weight: 700;
+      background: #fff8ef;
+    }
   </style>
 </head>
 <body>
@@ -167,22 +162,24 @@
     </div>
 
     <nav class="sidebar-links">
-  <a href="./index.html" onclick="closeSidebar()">Accounting Hub</a>
-  <a href="./budget.html" onclick="closeSidebar()">Budget Tracker</a>
-</nav>
+      <a href="./index.html" onclick="closeSidebar()">Accounting Hub</a>
+      <a href="./budget.html" onclick="closeSidebar()">Budget Tracker</a>
+    </nav>
   </aside>
 
-<section class="budget-wrap">
-  <div class="top-menu budget-top-menu">
-    <button class="top-menu-btn" type="button" onclick="showBudgetSection('create')">Create Budget</button>
-    <button class="top-menu-btn" type="button" onclick="showBudgetSection('results')">Budget Results</button>
-  </div>
-</section>
+  <section class="budget-wrap">
+    <div class="top-menu budget-top-menu">
+      <button class="top-menu-btn" type="button" onclick="showBudgetSection('create')">Create Budget</button>
+      <button class="top-menu-btn" type="button" onclick="showBudgetSection('results')">Budget Results</button>
+    </div>
+  </section>
 
   <section id="budget-create-section" class="budget-wrap">
     <div class="budget-card">
-      <h2 class="budget-title">Create Department Budget</h2>
-      <p>Create one budget for one department, then add that department’s expense items below.</p>
+      <h2 class="budget-title">Create Budget</h2>
+      <p class="budget-muted">
+        Select the department/group and frequency. The system will automatically load the expense lines for you.
+      </p>
 
       <div class="budget-grid">
         <div class="budget-field">
@@ -191,36 +188,56 @@
         </div>
 
         <div class="budget-field">
-          <label for="budget-department">Department</label>
-          <input id="budget-department" type="text" placeholder="Example: Marketing Department" />
+          <label for="budget-year">Budget Year</label>
+          <input id="budget-year" type="number" placeholder="2026" />
         </div>
 
         <div class="budget-field">
-          <label for="budget-year">Budget Year</label>
-          <input id="budget-year" type="number" placeholder="2026" />
+          <label for="budget-scope">Budget Scope</label>
+          <select id="budget-scope" onchange="handleScopeChange()">
+            <option value="Department">Department</option>
+            <option value="Company-wide">Company-wide</option>
+          </select>
+        </div>
+
+        <div class="budget-field" id="budget-department-field">
+          <label for="budget-department">Department</label>
+          <select id="budget-department" onchange="renderBudgetLines()">
+            <option value="Facilities">Facilities</option>
+            <option value="Finance">Finance</option>
+            <option value="Human Resource">Human Resource</option>
+            <option value="Information Technology">Information Technology</option>
+            <option value="Marketing">Marketing</option>
+            <option value="Operation">Operation</option>
+            <option value="Sales">Sales</option>
+            <option value="Chiefs">Chiefs</option>
+          </select>
+        </div>
+
+        <div class="budget-field">
+          <label for="budget-frequency">Frequency</label>
+          <select id="budget-frequency" onchange="renderBudgetLines()">
+            <option value="Monthly">Monthly</option>
+            <option value="Quarterly">Quarterly</option>
+            <option value="Semi-Annual">Semi-Annual</option>
+            <option value="Yearly">Yearly</option>
+          </select>
         </div>
       </div>
 
       <div class="budget-field">
         <label for="budget-notes">Notes</label>
-        <textarea id="budget-notes" placeholder="Optional notes for this department budget"></textarea>
+        <textarea id="budget-notes" placeholder="Optional notes"></textarea>
       </div>
 
       <div class="budget-table-wrap">
         <table class="budget-table">
-          <thead>
-            <tr>
-              <th style="width: 55%;">Expense Name</th>
-              <th style="width: 30%;">Budget Amount</th>
-              <th style="width: 15%;">Action</th>
-            </tr>
-          </thead>
+          <thead id="budget-table-head"></thead>
           <tbody id="budget-lines-body"></tbody>
         </table>
       </div>
 
       <div class="budget-actions">
-        <button class="budget-btn secondary" type="button" onclick="addBudgetLine()">+ Add Expense Line</button>
         <button class="budget-btn" type="button" onclick="createBudgetResult()">Create Budget</button>
       </div>
     </div>
@@ -237,6 +254,93 @@
 
   <script>
     let latestBudgetResult = null;
+
+    const DEPARTMENT_GENERAL_NAMES = {
+      "Facilities": "Facilities Department Expense - General",
+      "Finance": "Finance Department Expense - General",
+      "Human Resource": "Human Resource Department Expense - General",
+      "Information Technology": "Information Technology Department Expense - General",
+      "Marketing": "Marketing Department Expense - General",
+      "Operation": "Operation Department Expense - General",
+      "Sales": "Sales Department Expense - General",
+      "Chiefs": "Chiefs Expense - General"
+    };
+
+    const DEPARTMENT_PREFIXES = {
+      "Facilities": "FE - ",
+      "Finance": "Fine - ",
+      "Human Resource": "HRE - ",
+      "Information Technology": "ITE - ",
+      "Marketing": "ME - ",
+      "Operation": "OpEx - ",
+      "Sales": "SE - ",
+      "Chiefs": "ChiE - "
+    };
+
+    const DEPARTMENT_EXPENSE_GROUPS = [
+      "General",
+      "Advertising & Marketing",
+      "Meals & Entertainment",
+      "Bank Fees & Charges",
+      "Travel Expense",
+      "Lodging Expense",
+      "Mileage Expense",
+      "Telephone Expense",
+      "Internet & Subscription Expense",
+      "Electricity & Utilities",
+      "Rent Expense",
+      "Janitorial & Cleaning",
+      "Security Services",
+      "Postage & Shipping",
+      "Repairs & Maintenance",
+      "Office Supplies Expense",
+      "Office Equipment Expense",
+      "Depreciation Expense - Office Equipment",
+      "Depreciation Expense - Store Equipment",
+      "Salaries & Wages",
+      "Employee Benefits",
+      "Employee Allowances",
+      "Professional Fees",
+      "Service Fees",
+      "Government Fees & Permits",
+      "Taxes & Licenses",
+      "Parking Fees Expense"
+    ];
+
+    const COMPANY_WIDE_EXPENSES = [
+      "Company Expenses - General",
+      "Advertising & Marketing",
+      "Meals & Entertainment",
+      "Bank Fees & Charges",
+      "Travel Expense",
+      "Lodging Expense",
+      "Mileage Expense",
+      "Telephone Expense",
+      "Internet & Subscription Expense",
+      "Electricity & Utilities",
+      "Rent Expense",
+      "Janitorial & Cleaning",
+      "Security Services",
+      "Office Supplies Expense",
+      "Postage & Shipping",
+      "Repairs & Maintenance",
+      "Depreciation Expense - Office Equipment",
+      "Depreciation Expense - Store Equipment",
+      "Salaries & Wages Expense",
+      "Freelance/Service Expense",
+      "Employee Benefits",
+      "Employee Allowances",
+      "Professional Fees",
+      "Service Fees",
+      "Government Fees & Permits",
+      "Taxes & Licenses",
+      "Parking Fees Expense",
+      "Credit Card Charges",
+      "Bad Debt Expense",
+      "Purchase Discounts",
+      "Automobile Expense",
+      "Training & Development"
+    ];
 
     function toggleSidebar() {
       const sidebar = document.getElementById("sidebar-menu");
@@ -274,66 +378,179 @@
       });
     }
 
-    function addBudgetLine(expenseName = "", amount = "") {
-      const tbody = document.getElementById("budget-lines-body");
-      const tr = document.createElement("tr");
-
-      tr.innerHTML = `
-        <td>
-          <input type="text" class="budget-expense-name" placeholder="Example: Advertising & Marketing" value="${expenseName}">
-        </td>
-        <td>
-          <input type="number" class="budget-expense-amount" placeholder="0.00" step="0.01" min="0" value="${amount}">
-        </td>
-        <td>
-          <button type="button" class="budget-btn secondary" onclick="removeBudgetLine(this)">Remove</button>
-        </td>
-      `;
-
-      tbody.appendChild(tr);
+    function getPeriodsByFrequency(freq) {
+      if (freq === "Monthly") {
+        return ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+      }
+      if (freq === "Quarterly") {
+        return ["Q1", "Q2", "Q3", "Q4"];
+      }
+      if (freq === "Semi-Annual") {
+        return ["H1", "H2"];
+      }
+      return ["Year"];
     }
 
-    function removeBudgetLine(btn) {
-      const row = btn.closest("tr");
-      if (row) row.remove();
+    function getDepartmentExpenseNames(department) {
+      const prefix = DEPARTMENT_PREFIXES[department] || "";
+      const generalName = DEPARTMENT_GENERAL_NAMES[department] || `${department} Department Expense - General`;
+
+      return DEPARTMENT_EXPENSE_GROUPS.map(group => {
+        if (group === "General") return generalName;
+        return `${prefix}${group}`;
+      });
+    }
+
+    function getSelectedExpenseNames() {
+      const scope = document.getElementById("budget-scope").value;
+      const department = document.getElementById("budget-department").value;
+
+      if (scope === "Company-wide") {
+        return COMPANY_WIDE_EXPENSES;
+      }
+
+      return getDepartmentExpenseNames(department);
+    }
+
+    function handleScopeChange() {
+      const scope = document.getElementById("budget-scope").value;
+      const deptField = document.getElementById("budget-department-field");
+
+      if (scope === "Company-wide") {
+        deptField.style.display = "none";
+      } else {
+        deptField.style.display = "block";
+      }
+
+      renderBudgetLines();
+    }
+
+    function renderBudgetLines() {
+      const freq = document.getElementById("budget-frequency").value;
+      const periods = getPeriodsByFrequency(freq);
+      const expenses = getSelectedExpenseNames();
+
+      const thead = document.getElementById("budget-table-head");
+      const tbody = document.getElementById("budget-lines-body");
+
+      thead.innerHTML = "";
+      tbody.innerHTML = "";
+
+      const headRow = document.createElement("tr");
+      headRow.innerHTML = `
+        <th style="min-width:260px;">Expense Name</th>
+        ${periods.map(p => `<th>${p}</th>`).join("")}
+      `;
+      thead.appendChild(headRow);
+
+      expenses.forEach((expenseName, rowIndex) => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${escapeHtml(expenseName)}</td>
+          ${periods.map((p, periodIndex) => `
+            <td>
+              <input
+                type="number"
+                min="0"
+                step="0.01"
+                placeholder="0.00"
+                data-row-index="${rowIndex}"
+                data-period="${escapeAttr(p)}"
+                class="budget-amount-input"
+              />
+            </td>
+          `).join("")}
+        `;
+        tbody.appendChild(tr);
+      });
+
+      const totalRow = document.createElement("tr");
+      totalRow.className = "period-total-row";
+      totalRow.innerHTML = `
+        <td>Total</td>
+        ${periods.map(p => `<td id="period-total-${slugify(p)}" style="text-align:right;">0.00</td>`).join("")}
+      `;
+      tbody.appendChild(totalRow);
+
+      document.querySelectorAll(".budget-amount-input").forEach(input => {
+        input.addEventListener("input", updatePeriodTotals);
+      });
+
+      updatePeriodTotals();
+    }
+
+    function updatePeriodTotals() {
+      const freq = document.getElementById("budget-frequency").value;
+      const periods = getPeriodsByFrequency(freq);
+
+      periods.forEach(period => {
+        let total = 0;
+        document.querySelectorAll(`.budget-amount-input[data-period="${period}"]`).forEach(input => {
+          total += Number(input.value || 0);
+        });
+
+        const totalCell = document.getElementById(`period-total-${slugify(period)}`);
+        if (totalCell) totalCell.textContent = formatMoney(total);
+      });
     }
 
     function createBudgetResult() {
       const budgetName = document.getElementById("budget-name").value.trim();
-      const department = document.getElementById("budget-department").value.trim();
-      const year = document.getElementById("budget-year").value.trim();
+      const budgetYear = document.getElementById("budget-year").value.trim();
+      const scope = document.getElementById("budget-scope").value;
+      const department = document.getElementById("budget-department").value;
+      const frequency = document.getElementById("budget-frequency").value;
       const notes = document.getElementById("budget-notes").value.trim();
 
-      if (!budgetName || !department || !year) {
-        alert("Please fill in Budget Name, Department, and Budget Year.");
+      if (!budgetName || !budgetYear) {
+        alert("Please fill in Budget Name and Budget Year.");
         return;
       }
 
-      const rows = [...document.querySelectorAll("#budget-lines-body tr")];
-      const lines = rows.map(row => {
-        const expenseName = row.querySelector(".budget-expense-name")?.value.trim() || "";
-        const amount = parseFloat(row.querySelector(".budget-expense-amount")?.value || "0");
+      const periods = getPeriodsByFrequency(frequency);
+      const expenses = getSelectedExpenseNames();
+
+      const lines = expenses.map((expenseName, rowIndex) => {
+        const amounts = {};
+        let lineTotal = 0;
+
+        periods.forEach(period => {
+          const input = document.querySelector(`.budget-amount-input[data-row-index="${rowIndex}"][data-period="${period}"]`);
+          const amount = Number(input?.value || 0);
+          amounts[period] = amount;
+          lineTotal += amount;
+        });
 
         return {
           expenseName,
-          amount
+          amounts,
+          total: lineTotal
         };
-      }).filter(line => line.expenseName && line.amount > 0);
+      }).filter(line => line.total > 0);
 
       if (!lines.length) {
-        alert("Please add at least one expense line with amount.");
+        alert("Please enter at least one budget amount.");
         return;
       }
 
-      const total = lines.reduce((sum, line) => sum + Number(line.amount || 0), 0);
+      const totalsByPeriod = {};
+      periods.forEach(period => {
+        totalsByPeriod[period] = lines.reduce((sum, line) => sum + Number(line.amounts[period] || 0), 0);
+      });
+
+      const grandTotal = Object.values(totalsByPeriod).reduce((sum, val) => sum + Number(val || 0), 0);
 
       latestBudgetResult = {
         budgetName,
-        department,
-        year,
+        budgetYear,
+        scope,
+        department: scope === "Company-wide" ? "Company-wide" : department,
+        frequency,
         notes,
+        periods,
         lines,
-        total
+        totalsByPeriod,
+        grandTotal
       };
 
       renderBudgetResult();
@@ -348,40 +565,55 @@
         return;
       }
 
-      const result = latestBudgetResult;
+      const r = latestBudgetResult;
 
-      const linesHtml = result.lines.map(line => `
+      const headHtml = `
         <tr>
-          <td>${line.expenseName}</td>
-          <td>${formatMoney(line.amount)}</td>
+          <th>Expense Name</th>
+          ${r.periods.map(p => `<th>${escapeHtml(p)}</th>`).join("")}
+          <th>Total</th>
+        </tr>
+      `;
+
+      const bodyHtml = r.lines.map(line => `
+        <tr>
+          <td>${escapeHtml(line.expenseName)}</td>
+          ${r.periods.map(p => `<td style="text-align:right;">${formatMoney(line.amounts[p] || 0)}</td>`).join("")}
+          <td style="text-align:right;">${formatMoney(line.total)}</td>
         </tr>
       `).join("");
 
+      const totalRowHtml = `
+        <tr class="period-total-row">
+          <td>Total</td>
+          ${r.periods.map(p => `<td style="text-align:right;">${formatMoney(r.totalsByPeriod[p] || 0)}</td>`).join("")}
+          <td style="text-align:right;">${formatMoney(r.grandTotal)}</td>
+        </tr>
+      `;
+
       box.innerHTML = `
         <div class="budget-result-box">
-          <h3 style="margin-top:0;">${result.budgetName}</h3>
+          <h3 style="margin-top:0;">${escapeHtml(r.budgetName)}</h3>
 
           <div class="budget-meta">
-            <div><strong>Department:</strong><br>${result.department}</div>
-            <div><strong>Year:</strong><br>${result.year}</div>
-            <div><strong>Total Budget:</strong><br>${formatMoney(result.total)}</div>
+            <div><strong>Year:</strong><br>${escapeHtml(r.budgetYear)}</div>
+            <div><strong>Scope:</strong><br>${escapeHtml(r.scope)}</div>
+            <div><strong>Department/Group:</strong><br>${escapeHtml(r.department)}</div>
+            <div><strong>Frequency:</strong><br>${escapeHtml(r.frequency)}</div>
+            <div><strong>Grand Total:</strong><br>${formatMoney(r.grandTotal)}</div>
           </div>
 
           <div style="margin-bottom:16px;">
             <strong>Notes:</strong><br>
-            ${result.notes || "-"}
+            ${escapeHtml(r.notes || "-")}
           </div>
 
           <div class="budget-table-wrap">
             <table class="budget-table">
-              <thead>
-                <tr>
-                  <th>Expense Name</th>
-                  <th>Budget Amount</th>
-                </tr>
-              </thead>
+              <thead>${headHtml}</thead>
               <tbody>
-                ${linesHtml}
+                ${bodyHtml}
+                ${totalRowHtml}
               </tbody>
             </table>
           </div>
@@ -389,9 +621,28 @@
       `;
     }
 
-    addBudgetLine("Advertising & Marketing", "");
-    addBudgetLine("Meals & Entertainment", "");
-    addBudgetLine("Transportation", "");
+    function slugify(text) {
+      return String(text || "")
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/^-+|-+$/g, "");
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+
+    function escapeAttr(value) {
+      return escapeHtml(value);
+    }
+
+    handleScopeChange();
+    renderBudgetLines();
   </script>
 
 </body>

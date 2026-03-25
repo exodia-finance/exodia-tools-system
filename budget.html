@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Budget Tracker</title>
-  <link rel="stylesheet" href="./css/styles.css" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     .budget-wrap { padding: 20px; }
 
@@ -323,286 +323,94 @@
   <script>
     let latestBudgetResult = null;
 
-    const DEPARTMENT_DETAILS = {
-      "Facilities": [
-        "Facilities Department Expense - General",
-        "FE - Advertising & Marketing",
-        "FE - Meals & Entertainment",
-        "FE - Bank Fees & Charges",
-        "FE - Travel Expense",
-        "FE - Lodging Expense",
-        "FE - Mileage Expense",
-        "FE - Telephone Expense",
-        "FE - Internet & Subscription Expense",
-        "FE - Electricity & Utilities",
-        "FE - Rent Expense",
-        "FE - Janitorial & Cleaning",
-        "FE - Security Services",
-        "FE - Postage & Shipping",
-        "FE - Repairs & Maintenance",
-        "FE - Office Supplies Expense",
-        "FE - Office Equipment Expense",
-        "FE - Depreciation Expense - Office Equipment",
-        "FE - Depreciation Expense - Store Equipment",
-        "FE - Salaries & Wages",
-        "FE - Employee Benefits",
-        "FE - Employee Allowances",
-        "FE - Professional Fees",
-        "FE - Service Fees",
-        "FE - Government Fees & Permits",
-        "FE - Taxes & Licenses",
-        "FE - Parking Fees Expense"
-      ],
-      "Finance": [
-        "Finance Department Expense - General",
-        "Fine - Advertising & Marketing",
-        "Fine - Meals & Entertainment",
-        "Fine - Bank Fees & Charges",
-        "Fine - Travel Expense",
-        "Fine - Lodging Expense",
-        "Fine - Mileage Expense",
-        "Fine - Telephone Expense",
-        "Fine - Internet & Subscription Expense",
-        "Fine - Electricity & Utilities",
-        "Fine - Rent Expense",
-        "Fine - Janitorial & Cleaning",
-        "Fine - Security Services",
-        "Fine - Postage & Shipping",
-        "Fine - Repairs & Maintenance",
-        "Fine - Office Supplies Expense",
-        "Fine - Office Equipment Expense",
-        "Fine - Depreciation Expense - Office Equipment",
-        "Fine - Depreciation Expense - Store Equipment",
-        "Fine - Salaries & Wages",
-        "Fine - Employee Benefits",
-        "Fine - Employee Allowances",
-        "Fine - Professional Fees",
-        "Fine - Service Fees",
-        "Fine - Government Fees & Permits",
-        "Fine - Taxes & Licenses",
-        "Fine - Parking Fees Expense"
-      ],
-      "Human Resource": [
-        "Human Resource Department Expense - General",
-        "HRE - Advertising & Marketing",
-        "HRE - Meals & Entertainment",
-        "HRE - Bank Fees & Charges",
-        "HRE - Travel Expense",
-        "HRE - Lodging Expense",
-        "HRE - Mileage Expense",
-        "HRE - Telephone Expense",
-        "HRE - Internet & Subscription Expense",
-        "HRE - Electricity & Utilities",
-        "HRE - Rent Expense",
-        "HRE - Janitorial & Cleaning",
-        "HRE - Security Services",
-        "HRE - Postage & Shipping",
-        "HRE - Repairs & Maintenance",
-        "HRE - Office Supplies Expense",
-        "HRE - Office Equipment Expense",
-        "HRE - Depreciation Expense - Office Equipment",
-        "HRE - Depreciation Expense - Store Equipment",
-        "HRE - Salaries & Wages",
-        "HRE - Employee Benefits",
-        "HRE - Employee Allowances",
-        "HRE - Professional Fees",
-        "HRE - Service Fees",
-        "HRE - Government Fees & Permits",
-        "HRE - Taxes & Licenses",
-        "HRE - Parking Fees Expense"
-      ],
-      "Information Technology": [
-        "Information Technology Department Expense - General",
-        "ITE - Advertising & Marketing",
-        "ITE - Meals & Entertainment",
-        "ITE - Bank Fees & Charges",
-        "ITE - Travel Expense",
-        "ITE - Lodging Expense",
-        "ITE - Mileage Expense",
-        "ITE - Telephone Expense",
-        "ITE - Internet & Subscription Expense",
-        "ITE - Electricity & Utilities",
-        "ITE - Rent Expense",
-        "ITE - Janitorial & Cleaning",
-        "ITE - Security Services",
-        "ITE - Postage & Shipping",
-        "ITE - Repairs & Maintenance",
-        "ITE - Office Supplies Expense",
-        "ITE - Office Equipment Expense",
-        "ITE - Depreciation Expense - Office Equipment",
-        "ITE - Depreciation Expense - Store Equipment",
-        "ITE - Salaries & Wages",
-        "ITE - Employee Benefits",
-        "ITE - Employee Allowances",
-        "ITE - Professional Fees",
-        "ITE - Service Fees",
-        "ITE - Government Fees & Permits",
-        "ITE - Taxes & Licenses",
-        "ITE - Parking Fees Expense"
-      ],
-      "Marketing": [
-        "Marketing Department Expense - General",
-        "ME - Advertising & Marketing",
-        "ME - Meals & Entertainment",
-        "ME - Bank Fees & Charges",
-        "ME - Travel Expense",
-        "ME - Lodging Expense",
-        "ME - Mileage Expense",
-        "ME - Telephone Expense",
-        "ME - Internet & Subscription Expense",
-        "ME - Electricity & Utilities",
-        "ME - Rent Expense",
-        "ME - Janitorial & Cleaning",
-        "ME - Security Services",
-        "ME - Postage & Shipping",
-        "ME - Repairs & Maintenance",
-        "ME - Office Supplies Expense",
-        "ME - Office Equipment Expense",
-        "ME - Depreciation Expense - Office Equipment",
-        "ME - Depreciation Expense - Store Equipment",
-        "ME - Salaries & Wages",
-        "ME - Employee Benefits",
-        "ME - Employee Allowances",
-        "ME - Professional Fees",
-        "ME - Service Fees",
-        "ME - Government Fees & Permits",
-        "ME - Taxes & Licenses",
-        "ME - Parking Fees Expense"
-      ],
-      "Operation": [
-        "Operation Department Expense - General",
-        "OpEx - Advertising & Marketing",
-        "OpEx - Meals & Entertainment",
-        "OpEx - Bank Fees & Charges",
-        "OpEx - Travel Expense",
-        "OpEx - Lodging Expense",
-        "OpEx - Mileage Expense",
-        "OpEx - Telephone Expense",
-        "OpEx - Internet & Subscription Expense",
-        "OpEx - Electricity & Utilities",
-        "OpEx - Rent Expense",
-        "OpEx - Janitorial & Cleaning",
-        "OpEx - Security Services",
-        "OpEx - Postage & Shipping",
-        "OpEx - Repairs & Maintenance",
-        "OpEx - Office Supplies Expense",
-        "OpEx - Office Equipment Expense",
-        "OpEx - Depreciation Expense - Office Equipment",
-        "OpEx - Depreciation Expense - Store Equipment",
-        "OpEx - Salaries & Wages",
-        "OpEx - Employee Benefits",
-        "OpEx - Employee Allowances",
-        "OpEx - Professional Fees",
-        "OpEx - Service Fees",
-        "OpEx - Government Fees & Permits",
-        "OpEx - Taxes & Licenses",
-        "OpEx - Parking Fees Expense"
-      ],
-      "Sales": [
-        "Sales Department Expense - General",
-        "SE - Advertising & Marketing",
-        "SE - Meals & Entertainment",
-        "SE - Bank Fees & Charges",
-        "SE - Travel Expense",
-        "SE - Lodging Expense",
-        "SE - Mileage Expense",
-        "SE - Telephone Expense",
-        "SE - Internet & Subscription Expense",
-        "SE - Electricity & Utilities",
-        "SE - Rent Expense",
-        "SE - Janitorial & Cleaning",
-        "SE - Security Services",
-        "SE - Postage & Shipping",
-        "SE - Repairs & Maintenance",
-        "SE - Office Supplies Expense",
-        "SE - Office Equipment Expense",
-        "SE - Depreciation Expense - Office Equipment",
-        "SE - Depreciation Expense - Store Equipment",
-        "SE - Salaries & Wages",
-        "SE - Employee Benefits",
-        "SE - Employee Allowances",
-        "SE - Professional Fees",
-        "SE - Service Fees",
-        "SE - Government Fees & Permits",
-        "SE - Taxes & Licenses",
-        "SE - Parking Fees Expense"
-      ],
-      "Chiefs": [
-        "Chiefs Expense - General",
-        "ChiE - Advertising & Marketing",
-        "ChiE - Meals & Entertainment",
-        "ChiE - Bank Fees & Charges",
-        "ChiE - Travel Expense",
-        "ChiE - Lodging Expense",
-        "ChiE - Mileage Expense",
-        "ChiE - Telephone Expense",
-        "ChiE - Internet & Subscription Expense",
-        "ChiE - Electricity & Utilities",
-        "ChiE - Rent Expense",
-        "ChiE - Janitorial & Cleaning",
-        "ChiE - Security Services",
-        "ChiE - Postage & Shipping",
-        "ChiE - Repairs & Maintenance",
-        "ChiE - Office Supplies Expense",
-        "ChiE - Office Equipment Expense",
-        "ChiE - Depreciation Expense - Office Equipment",
-        "ChiE - Depreciation Expense - Store Equipment",
-        "ChiE - Salaries & Wages",
-        "ChiE - Employee Benefits",
-        "ChiE - Employee Allowances",
-        "ChiE - Professional Fees",
-        "ChiE - Service Fees",
-        "ChiE - Government Fees & Permits",
-        "ChiE - Taxes & Licenses",
-        "ChiE - Parking Fees Expense"
-      ],
-      "Company-wide": [
-        "Company Expenses - General",
-        "Advertising & Marketing",
-        "Meals & Entertainment",
-        "Bank Fees & Charges",
-        "Travel Expense",
-        "Lodging Expense",
-        "Mileage Expense",
-        "Telephone Expense",
-        "Internet & Subscription Expense",
-        "Electricity & Utilities",
-        "Rent Expense",
-        "Janitorial & Cleaning",
-        "Security Services",
-        "Office Supplies Expense",
-        "Postage & Shipping",
-        "Repairs & Maintenance",
-        "Depreciation Expense - Office Equipment",
-        "Depreciation Expense - Store Equipment",
-        "Salaries & Wages Expense",
-        "Freelance/Service Expense",
-        "Employee Benefits",
-        "Employee Allowances",
-        "Professional Fees",
-        "Service Fees",
-        "Government Fees & Permits",
-        "Taxes & Licenses",
-        "Parking Fees Expense",
-        "Credit Card Charges",
-        "Bad Debt Expense",
-        "Purchase Discounts",
-        "Automobile Expense",
-        "Training & Development"
-      ]
-    };
+    const SUPABASE_URL = "https://pezowkprqtawqzqjtzb.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_E1idmqAS85V-IVFdOqqV_w_smrIsLuP";
 
-    const BUDGET_GROUPS = [
-      "Facilities",
-      "Finance",
-      "Human Resource",
-      "Information Technology",
-      "Marketing",
-      "Operation",
-      "Sales",
-      "Chiefs",
-      "Company-wide"
-    ];
+let sb = null;
+let LIVE_COA = [];
+let DEPARTMENT_DETAILS = {};
+let BUDGET_GROUPS = [];
+
+function getDepartmentGroupFromAccountName(accountName = "") {
+  const name = String(accountName || "").trim();
+
+  if (!name) return "Company";
+
+  if (name === "Facilities Department Expense - General" || name.startsWith("FE - ")) return "Facilities";
+  if (name === "Finance Department Expense - General" || name.startsWith("Fine - ")) return "Finance";
+  if (name === "Human Resource Department Expense - General" || name.startsWith("HRE - ")) return "Human Resource";
+  if (name === "Information Technology Department Expense - General" || name.startsWith("ITE - ")) return "Information Technology";
+  if (name === "Marketing Department Expense - General" || name.startsWith("ME - ")) return "Marketing";
+  if (name === "Operation Department Expense - General" || name.startsWith("OpEx - ")) return "Operation";
+  if (name === "Sales Department Expense - General" || name.startsWith("SE - ")) return "Sales";
+  if (name === "Chiefs Expense - General" || name.startsWith("ChiE - ")) return "Chiefs";
+
+  return "Company";
+}
+
+function buildBudgetGroupsFromCOA(rows) {
+  const grouped = {
+    "Facilities": [],
+    "Finance": [],
+    "Human Resource": [],
+    "Information Technology": [],
+    "Marketing": [],
+    "Operation": [],
+    "Sales": [],
+    "Chiefs": [],
+    "Company": []
+  };
+
+  (rows || []).forEach(row => {
+    const type = String(row.type || "").trim().toLowerCase();
+    const name = String(row.name || row.account_name || "").trim();
+    const isDeleted = row.is_deleted === true;
+
+    if (!name || isDeleted) return;
+    if (type !== "expense") return;
+
+    const group = getDepartmentGroupFromAccountName(name);
+    if (!grouped[group]) grouped[group] = [];
+    grouped[group].push(name);
+  });
+
+  Object.keys(grouped).forEach(group => {
+    grouped[group] = [...new Set(grouped[group])].sort((a, b) => a.localeCompare(b));
+  });
+
+  DEPARTMENT_DETAILS = grouped;
+  BUDGET_GROUPS = Object.keys(grouped).filter(group => grouped[group].length > 0);
+}
+
+async function fetchLiveCOA() {
+  if (!sb) throw new Error("Supabase is not initialized.");
+
+  const { data, error } = await sb
+    .from("coa_accounts")
+    .select("id, code, name, type, normal, is_deleted, created_at")
+    .order("code", { ascending: true });
+
+  if (error) throw error;
+
+  LIVE_COA = data || [];
+  buildBudgetGroupsFromCOA(LIVE_COA);
+}
+
+async function initializeBudgetPage() {
+  try {
+    if (!window.supabase || !window.supabase.createClient) {
+      throw new Error("Supabase library not loaded.");
+    }
+
+    sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    await fetchLiveCOA();
+    initializeBudgetPage();
+  } catch (err) {
+    console.error("Budget page init failed:", err);
+    alert("Failed to load live Chart of Accounts for Budget. Please check Supabase settings.");
+  }
+}
 
     function toggleSidebar() {
       const sidebar = document.getElementById("sidebar-menu");

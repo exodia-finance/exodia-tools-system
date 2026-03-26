@@ -525,6 +525,41 @@ async function fetchActualTotalsByGroup(startDate, endDate) {
 
   return totals;
 }
+
+    async function fetchActualBreakdownByGroup(startDate, endDate, groupName) {
+  if (!sb) throw new Error("Supabase is not initialized.");
+
+  const { data, error } = await sb
+    .from("journal_lines")
+    .select("entry_date, account_name, debit, credit, company_id, is_deleted")
+    .eq("company_id", "exodia-main")
+    .or("is_deleted.is.null,is_deleted.eq.false")
+    .gte("entry_date", startDate)
+    .lte("entry_date", endDate);
+
+  if (error) throw error;
+
+  const breakdown = {};
+
+  (data || []).forEach(line => {
+    const accountName = String(line.account_name || "").trim();
+    const group = getDepartmentGroupFromAccountName(accountName);
+
+    if (group !== groupName) return;
+
+    const normalizedName = normalizeBudgetAccountName(accountName);
+    const debit = Number(line.debit || 0);
+    const credit = Number(line.credit || 0);
+    const actual = debit - credit;
+
+    if (!breakdown[normalizedName]) breakdown[normalizedName] = 0;
+    breakdown[normalizedName] += actual;
+  });
+
+  return Object.entries(breakdown)
+    .map(([expenseName, amount]) => ({ expenseName, amount }))
+    .sort((a, b) => Math.abs(b.amount) - Math.abs(a.amount));
+}
     
     function addMonths(date, months) {
   const d = new Date(date);
@@ -618,20 +653,40 @@ function autoSetEndDate() {
       if (cell) cell.textContent = formatMoney(total);
     }
 
-    function openDetailsPanel(groupName) {
-      const panel = document.getElementById("details-panel");
-      const title = document.getElementById("details-title");
-      const subtitle = document.getElementById("details-subtitle");
-      const body = document.getElementById("details-body");
+    async function openDetailsPanel(groupName) {
+  const panel = document.getElementById("details-panel");
+  const title = document.getElementById("details-title");
+  const subtitle = document.getElementById("details-subtitle");
+  const body = document.getElementById("details-body");
 
-      const items = DEPARTMENT_DETAILS[groupName] || [];
+  const startDate = latestBudgetResult?.startDate;
+  const endDate = latestBudgetResult?.endDate;
 
-      title.textContent = `${groupName} Details`;
-      subtitle.textContent = "Expense accounts under this department/group";
-      body.innerHTML = items.map(name => `<tr><td>${escapeHtml(name)}</td></tr>`).join("");
+  title.textContent = `${groupName} Details`;
+  subtitle.textContent = "Expense accounts and actual amounts inside this budget date range";
+  body.innerHTML = `<tr><td colspan="2">Loading...</td></tr>`;
 
-      panel.classList.add("show");
+  panel.classList.add("show");
+
+  try {
+    const rows = await fetchActualBreakdownByGroup(startDate, endDate, groupName);
+
+    if (!rows.length) {
+      body.innerHTML = `<tr><td colspan="2">No transactions found for this group in the selected budget period.</td></tr>`;
+      return;
     }
+
+    body.innerHTML = rows.map(row => `
+      <tr>
+        <td>${escapeHtml(row.expenseName)}</td>
+        <td style="text-align:right;">${formatMoney(row.amount)}</td>
+      </tr>
+    `).join("");
+  } catch (err) {
+    console.error("Failed to load detail breakdown:", err);
+    body.innerHTML = `<tr><td colspan="2">Failed to load detail breakdown.</td></tr>`;
+  }
+}
 
     function closeDetailsPanel(event) {
       if (event && event.target && event.target.id !== "details-panel") return;

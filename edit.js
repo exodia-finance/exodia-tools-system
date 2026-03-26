@@ -343,7 +343,7 @@ async function saveChanges(journalId, userId) {
     return;
   }
 
-  setStatus("Saving changes...");
+  setStatus("Saving changes... ⏳");
 
   const { error: headErr } = await sb
     .from("journal_entries")
@@ -362,7 +362,17 @@ async function saveChanges(journalId, userId) {
 
   if (headErr) {
   console.error(headErr);
-  setStatus(`Header update failed: ${headErr.message || "Unknown error"}`, true);
+
+  const msg = headErr.message || "Unknown error";
+
+  if (msg.includes("journal_entries_user_date_ref_unique")) {
+    setStatus(
+      "Cannot save changes because another journal entry already uses the same date and reference number.",
+      true
+    );
+  } else {
+    setStatus(`Header update failed: ${msg}`, true);
+  }
   return;
 }
 
@@ -402,9 +412,19 @@ async function saveChanges(journalId, userId) {
 
   const { error: insErr } = await sb.from("journal_lines").insert(fresh);
 
-  if (headErr) {
-  console.error(headErr);
-  setStatus(`Header update failed: ${headErr.message || "Unknown error"}`, true);
+if (insErr) {
+  console.error(insErr);
+
+  const msg = insErr.message || "Unknown error";
+
+  if (msg.includes("journal_entries_user_date_ref_unique")) {
+    setStatus(
+      "Cannot save changes because another journal entry already uses the same date and reference number.",
+      true
+    );
+  } else {
+    setStatus(`Insert failed: ${msg}`, true);
+  }
   return;
 }
 

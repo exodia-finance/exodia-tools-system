@@ -340,6 +340,8 @@
 
   <script>
     let latestBudgetResult = null;
+let currentBudgetContext = null;
+let savedBudgetsHistory = [];
 
     const SUPABASE_URL = "https://vtglfaeyvmciieuntzhs.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_E1idmqAS85V-IVFdOqqV_w_smrIsLuP";
@@ -659,8 +661,8 @@ function autoSetEndDate() {
   const subtitle = document.getElementById("details-subtitle");
   const body = document.getElementById("details-body");
 
-  const startDate = latestBudgetResult?.startDate;
-  const endDate = latestBudgetResult?.endDate;
+  const startDate = currentBudgetContext?.startDate || latestBudgetResult?.startDate;
+const endDate = currentBudgetContext?.endDate || latestBudgetResult?.endDate;
 
   title.textContent = `${groupName} Details`;
   subtitle.textContent = "Expense accounts and actual amounts inside this budget date range";
@@ -773,9 +775,11 @@ try {
   overallStatus: getOverallBudgetStatus(startDate, endDate)
 };
 
-    renderBudgetResults();
-    showBudgetSection("results");
-    alert("✅ Budget saved successfully!");
+await loadAllSavedBudgets();
+renderBudgetResults();
+openSavedBudget(savedBudget.id);
+showBudgetSection("results");
+alert("✅ Budget saved successfully!");
   } catch (err) {
     console.error("Budget save error:", err);
     alert("❌ Failed to save budget: " + (err.message || JSON.stringify(err)));
@@ -816,71 +820,191 @@ try {
   return budgetRow;
 }
 
+    async function buildBudgetSummaryFromSavedData(budgetRow, lineRows) {
+  const actualTotalsByGroup = await fetchActualTotalsByGroup(budgetRow.start_date, budgetRow.end_date);
+
+  const groupBudgets = (lineRows || []).map(line => {
+    const applied = Number(line.amount || 0);
+    const actual = Number(actualTotalsByGroup[line.group_name] || 0);
+    const remaining = applied - actual;
+
+    return {
+      group: line.group_name,
+      amount: applied,
+      actual,
+      remaining,
+      status: getLineStatus(budgetRow.start_date, budgetRow.end_date, remaining)
+    };
+  });
+
+  const grandTotal = groupBudgets.reduce((sum, item) => sum + Number(item.amount || 0), 0);
+  const grandActual = groupBudgets.reduce((sum, item) => sum + Number(item.actual || 0), 0);
+  const grandRemaining = grandTotal - grandActual;
+
+  return {
+    id: budgetRow.id,
+    budgetName: budgetRow.budget_name,
+    budgetYear: budgetRow.budget_year,
+    frequency: budgetRow.frequency,
+    startDate: budgetRow.start_date,
+    endDate: budgetRow.end_date,
+    notes: budgetRow.notes || "",
+    groupBudgets,
+    grandTotal,
+    grandActual,
+    grandRemaining,
+    overallStatus: getOverallBudgetStatus(budgetRow.start_date, budgetRow.end_date)
+  };
+}
+
+async function loadAllSavedBudgets() {
+  if (!sb) throw new Error("Supabase is not initialized.");
+
+  const { data: budgets, error: budgetsError } = await sb
+    .from("budgets")
+    .select("id, budget_name, budget_year, frequency, start_date, end_date, notes, created_at")
+    .order("created_at", { ascending: false });
+
+  if (budgetsError) throw budgetsError;
+
+  const history = [];
+
+  for (const budget of (budgets || [])) {
+    const { data: lines, error: linesError } = await sb
+      .from("budget_lines")
+      .select("budget_id, group_name, amount")
+      .eq("budget_id", budget.id)
+      .order("group_name", { ascending: true });
+
+    if (linesError) throw linesError;
+
+    const summary = await buildBudgetSummaryFromSavedData(budget, lines || []);
+    history.push(summary);
+  }
+
+  savedBudgetsHistory = history;
+}
+
     function renderBudgetResults() {
   const box = document.getElementById("budget-results-content");
 
-  if (!latestBudgetResult) {
+  if (!savedBudgetsHistory.length) {
     box.innerHTML = "No budget created yet.";
     return;
   }
 
-  const r = latestBudgetResult;
-
-  const bodyHtml = r.groupBudgets.map(item => `
-  <tr>
-    <td>${escapeHtml(item.group)}</td>
-    <td style="text-align:right;">${formatMoney(item.amount)}</td>
-    <td style="text-align:right;">${formatMoney(item.actual || 0)}</td>
-    <td style="text-align:right;">${formatMoney(item.remaining || 0)}</td>
-    <td>${escapeHtml(item.status || "-")}</td>
-    <td>
-      <button type="button" class="budget-btn secondary" onclick="openDetailsPanel('${escapeJs(item.group)}')">View Details</button>
-    </td>
-  </tr>
-`).join("");
+  const summaryRows = savedBudgetsHistory.map(item => `
+    <tr>
+      <td>${escapeHtml(item.budgetName)}</td>
+      <td>${escapeHtml(String(item.budgetYear))}</td>
+      <td>${escapeHtml(item.frequency || "-")}</td>
+      <td>${escapeHtml(item.startDate || "-")}</td>
+      <td>${escapeHtml(item.endDate || "-")}</td>
+      <td style="text-align:right;">${formatMoney(item.grandTotal || 0)}</td>
+      <td style="text-align:right;">${formatMoney(item.grandActual || 0)}</td>
+      <td style="text-align:right;">${formatMoney(item.grandRemaining || 0)}</td>
+      <td>${escapeHtml(item.overallStatus || "-")}</td>
+      <td>
+        <button type="button" class="budget-btn secondary" onclick="openSavedBudget('${escapeJs(item.id)}')">Open</button>
+      </td>
+    </tr>
+  `).join("");
 
   box.innerHTML = `
     <div class="budget-result-box">
-      <h3 style="margin-top:0;">${escapeHtml(r.budgetName)}</h3>
+      <h3 style="margin-top:0;">Saved Budgets</h3>
+
+      <div class="budget-table-wrap">
+        <table class="budget-table">
+          <thead>
+            <tr>
+              <th>Budget Name</th>
+              <th>Year</th>
+              <th>Frequency</th>
+              <th>Start Date</th>
+              <th>End Date</th>
+              <th>Applied</th>
+              <th>Actual</th>
+              <th>Remaining</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${summaryRows}
+          </tbody>
+        </table>
+      </div>
+
+      <div id="opened-budget-view" style="margin-top:20px;"></div>
+    </div>
+  `;
+}
+
+    function openSavedBudget(budgetId) {
+  const selected = savedBudgetsHistory.find(item => item.id === budgetId);
+  if (!selected) return;
+
+  currentBudgetContext = selected;
+
+  const container = document.getElementById("opened-budget-view");
+  if (!container) return;
+
+  const bodyHtml = selected.groupBudgets.map(item => `
+    <tr>
+      <td>${escapeHtml(item.group)}</td>
+      <td style="text-align:right;">${formatMoney(item.amount)}</td>
+      <td style="text-align:right;">${formatMoney(item.actual || 0)}</td>
+      <td style="text-align:right;">${formatMoney(item.remaining || 0)}</td>
+      <td>${escapeHtml(item.status || "-")}</td>
+      <td>
+        <button type="button" class="budget-btn secondary" onclick="openDetailsPanel('${escapeJs(item.group)}')">View Details</button>
+      </td>
+    </tr>
+  `).join("");
+
+  container.innerHTML = `
+    <div class="budget-result-box">
+      <h3 style="margin-top:0;">${escapeHtml(selected.budgetName)}</h3>
 
       <div class="budget-meta">
-        <div><strong>Year:</strong><br>${escapeHtml(r.budgetYear)}</div>
-<div><strong>Frequency:</strong><br>${escapeHtml(r.frequency)}</div>
-<div><strong>Start Date:</strong><br>${escapeHtml(r.startDate || "-")}</div>
-<div><strong>End Date:</strong><br>${escapeHtml(r.endDate || "-")}</div>
-<div><strong>Applied Budget:</strong><br>${formatMoney(r.grandTotal)}</div>
-<div><strong>Actual:</strong><br>${formatMoney(r.grandActual || 0)}</div>
-<div><strong>Remaining:</strong><br>${formatMoney(r.grandRemaining || 0)}</div>
-<div><strong>Status:</strong><br>${escapeHtml(r.overallStatus || "-")}</div>
+        <div><strong>Year:</strong><br>${escapeHtml(String(selected.budgetYear))}</div>
+        <div><strong>Frequency:</strong><br>${escapeHtml(selected.frequency || "-")}</div>
+        <div><strong>Start Date:</strong><br>${escapeHtml(selected.startDate || "-")}</div>
+        <div><strong>End Date:</strong><br>${escapeHtml(selected.endDate || "-")}</div>
+        <div><strong>Applied Budget:</strong><br>${formatMoney(selected.grandTotal || 0)}</div>
+        <div><strong>Actual:</strong><br>${formatMoney(selected.grandActual || 0)}</div>
+        <div><strong>Remaining:</strong><br>${formatMoney(selected.grandRemaining || 0)}</div>
+        <div><strong>Status:</strong><br>${escapeHtml(selected.overallStatus || "-")}</div>
       </div>
 
       <div style="margin-bottom:16px;">
         <strong>Notes:</strong><br>
-        ${escapeHtml(r.notes || "-")}
+        ${escapeHtml(selected.notes || "-")}
       </div>
 
       <div class="budget-table-wrap">
         <table class="budget-table">
           <thead>
-  <tr>
-    <th>Department / Group</th>
-    <th>Applied</th>
-    <th>Actual</th>
-    <th>Remaining</th>
-    <th>Status</th>
-    <th>Action</th>
-  </tr>
-</thead>
+            <tr>
+              <th>Department / Group</th>
+              <th>Applied</th>
+              <th>Actual</th>
+              <th>Remaining</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
           <tbody>
             ${bodyHtml}
             <tr class="period-total-row">
-  <td>Grand Total</td>
-  <td style="text-align:right;">${formatMoney(r.grandTotal)}</td>
-  <td style="text-align:right;">${formatMoney(r.grandActual || 0)}</td>
-  <td style="text-align:right;">${formatMoney(r.grandRemaining || 0)}</td>
-  <td>${escapeHtml(r.overallStatus || "-")}</td>
-  <td></td>
-</tr>
+              <td>Grand Total</td>
+              <td style="text-align:right;">${formatMoney(selected.grandTotal || 0)}</td>
+              <td style="text-align:right;">${formatMoney(selected.grandActual || 0)}</td>
+              <td style="text-align:right;">${formatMoney(selected.grandRemaining || 0)}</td>
+              <td>${escapeHtml(selected.overallStatus || "-")}</td>
+              <td></td>
+            </tr>
           </tbody>
         </table>
       </div>
@@ -905,7 +1029,15 @@ try {
 
     document.getElementById("budget-start-date").value = formatDateForInput(new Date());
 autoSetEndDate();
-    initializeBudgetPage();
+
+initializeBudgetPage().then(async () => {
+  try {
+    await loadAllSavedBudgets();
+    renderBudgetResults();
+  } catch (err) {
+    console.error("Failed to load saved budget history:", err);
+  }
+});
   </script>
 
 </body>

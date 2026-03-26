@@ -38,6 +38,10 @@ const sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 // ==============================
 const $ = (id) => document.getElementById(id);
 
+function finishAuthBoot() {
+  document.body.classList.remove("auth-loading");
+}
+
 let successMessageTimer = null;
 
 function showSuccessMessage(message) {

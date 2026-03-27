@@ -364,6 +364,14 @@
   return "Under Budget";
 }
 
+    function getGrandBudgetStatus(remaining) {
+  const value = Number(remaining || 0);
+
+  if (value < 0) return "Over Budget";
+  if (value === 0) return "Exact Budget";
+  return "Under Budget";
+}
+
     async function fetchActualTotalsByGroup(startDate, endDate) {
       const totals = {};
       BUDGET_GROUPS.forEach(group => { totals[group] = 0; });
@@ -602,13 +610,13 @@
             <tbody>
               ${bodyHtml}
               <tr class="period-total-row">
-                <td>Grand Total</td>
-                <td style="text-align:right;">${formatMoney(r.grandTotal || 0)}</td>
-                <td style="text-align:right;">${formatMoney(r.grandActual || 0)}</td>
-                <td style="text-align:right;">${formatMoney(r.grandRemaining || 0)}</td>
-                <td>${escapeHtml(r.overallStatus || "-")}</td>
-                <td></td>
-              </tr>
+  <td>Grand Total</td>
+  <td style="text-align:right;">${formatMoney(r.grandTotal || 0)}</td>
+  <td style="text-align:right;">${formatMoney(r.grandActual || 0)}</td>
+  <td style="text-align:right;">${formatMoney(r.grandRemaining || 0)}</td>
+  <td>${escapeHtml(getGrandBudgetStatus(r.grandRemaining || 0))}</td>
+  <td></td>
+</tr>
             </tbody>
           </table>
         </div>

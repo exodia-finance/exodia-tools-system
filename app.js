@@ -3655,8 +3655,7 @@ function getCurrentAccessLevel() {
 }
 
 function isAdminUser() {
-  const email = String(currentUser?.email || "").toLowerCase();
-  return getCurrentAccessLevel() === "admin" || email === "financeadmin@exodiagamedev.com";
+  return getCurrentAccessLevel() === "admin";
 }
 
 function isEditorUser() {

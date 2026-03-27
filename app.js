@@ -3708,8 +3708,66 @@ window.viewHistoryEntry = async function viewHistoryEntry(journal_id) {
     $("auth-pass")?.addEventListener("input", refreshLoginButtonState);
     refreshLoginButtonState();
 
-    const { data } = await sb.auth.getSession();
-    const session = data.session;
+    const rememberedEmail =
+  session?.user?.email ||
+  localStorage.getItem(REMEMBER_EMAIL_KEY) ||
+  "";
+
+if (session?.user) {
+  currentUser = session.user;
+
+  if (shouldRequireVerify()) {
+    localStorage.setItem(VERIFY_REQUIRED_KEY, "1");
+    showVerifyModal(rememberedEmail);
+    return;
+  }
+
+  if (isPastInactivityLimit()) {
+    await hardReturnToLogin(false);
+    return;
+  }
+
+  const { data: accessRow, error: accessError } = await sb
+    .from("user_access")
+    .select("*")
+    .eq("email", currentUser.email)
+    .single();
+
+  if (accessError || !accessRow) {
+    await sb.auth.signOut();
+    currentUser = null;
+    setUI(false);
+    setAuthMsg("No user access record found. Please contact admin.", true);
+    return;
+  }
+
+  if (String(accessRow.status || "").toLowerCase() === "disabled") {
+    await sb.auth.signOut();
+    currentUser = null;
+    setUI(false);
+    setAuthMsg("Your account is disabled. Please contact admin.", true);
+    return;
+  }
+
+  localStorage.setItem(REMEMBER_EMAIL_KEY, currentUser.email || "");
+  if (!localStorage.getItem(LOGIN_AT_KEY)) {
+    localStorage.setItem(LOGIN_AT_KEY, String(nowMs()));
+  }
+  if (!localStorage.getItem(LAST_ACTIVITY_KEY)) {
+    localStorage.setItem(LAST_ACTIVITY_KEY, String(nowMs()));
+  }
+
+  setUI(true, currentUser.email);
+  await initAppAfterLogin();
+  startActivityTracking();
+} else {
+  setUI(false);
+
+  if (localStorage.getItem(INACTIVITY_MESSAGE_KEY) === "1") {
+    setAuthMsg("You were signed out due to inactivity.", true);
+    localStorage.removeItem(INACTIVITY_MESSAGE_KEY);
+  }
+}
 
     if (session?.user) {
       currentUser = session.user;

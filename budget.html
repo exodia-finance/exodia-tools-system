@@ -559,9 +559,11 @@ function getOverallBudgetStatus(startDate, endDate) {
 }
 
 function getLineStatus(startDate, endDate, remaining) {
-  const base = getOverallBudgetStatus(startDate, endDate);
-  if (Number(remaining || 0) < 0) return "Over Budget";
-  return base === "Active" ? "Within Budget" : base;
+  const value = Number(remaining || 0);
+
+  if (value < 0) return "Over Budget";
+  if (value === 0) return "Exact Budget";
+  return "Under Budget";
 }
 
 async function fetchActualTotalsByGroup(startDate, endDate) {
@@ -797,15 +799,14 @@ const notes = document.getElementById("budget-notes").value.trim();
 }
 
   const groupBudgets = BUDGET_GROUPS.map((group, index) => {
-    const input = document.querySelector(`.department-budget-input[data-group-index="${index}"]`);
-    const amount = Number(input?.value || 0);
+  const input = document.querySelector(`.department-budget-input[data-group-index="${index}"]`);
+  const rawValue = String(input?.value ?? "").trim();
 
-    return {
-      group,
-      amount,
-      details: DEPARTMENT_DETAILS[group] || []
-    };
-  }).filter(item => item.amount > 0);
+  return {
+    group,
+    amount: rawValue === "" ? null : Number(rawValue)
+  };
+}).filter(item => item.amount !== null);
 
   if (!groupBudgets.length) {
     alert("Please enter at least one department/group budget amount.");

@@ -212,6 +212,46 @@
     .mini-link {
       text-decoration: none;
     }
+
+.loading-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.28);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 3000;
+}
+
+.loading-overlay.show {
+  display: flex;
+}
+
+.loading-box {
+  background: #fff;
+  border: 1px solid #ead7c3;
+  border-radius: 14px;
+  padding: 20px 24px;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.18);
+  font-weight: 700;
+  min-width: 220px;
+  text-align: center;
+}
+
+.toast-message {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background: #fff;
+  border: 1px solid #d6a067;
+  border-radius: 12px;
+  padding: 12px 16px;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+  z-index: 3100;
+  display: none;
+  font-weight: 700;
+}
+  
   </style>
 </head>
 <body>
@@ -328,15 +368,22 @@
       <div class="budget-table-wrap">
         <table class="budget-table">
           <thead>
-            <tr>
-              <th>Expense Name</th>
-            </tr>
-          </thead>
+  <tr>
+    <th>Expense Name</th>
+    <th style="text-align:right;">Actual Amount</th>
+  </tr>
+</thead>
           <tbody id="details-body"></tbody>
         </table>
       </div>
     </div>
   </div>
+
+  <div id="loading-overlay" class="loading-overlay">
+  <div class="loading-box" id="loading-text">Processing...</div>
+</div>
+
+<div id="toast-message" class="toast-message"></div>
 
   <script>
     let latestBudgetResult = null;
@@ -437,6 +484,30 @@ async function initializeBudgetPage() {
   }
 }
 
+function showLoading(message = "Processing...") {
+  const overlay = document.getElementById("loading-overlay");
+  const text = document.getElementById("loading-text");
+  if (text) text.textContent = message;
+  if (overlay) overlay.classList.add("show");
+}
+
+function hideLoading() {
+  const overlay = document.getElementById("loading-overlay");
+  if (overlay) overlay.classList.remove("show");
+}
+
+function showToast(message) {
+  const toast = document.getElementById("toast-message");
+  if (!toast) return;
+
+  toast.textContent = message;
+  toast.style.display = "block";
+
+  setTimeout(() => {
+    toast.style.display = "none";
+  }, 1500);
+}
+    
     function toggleSidebar() {
       const sidebar = document.getElementById("sidebar-menu");
       const overlay = document.getElementById("sidebar-overlay");
@@ -494,7 +565,17 @@ function getLineStatus(startDate, endDate, remaining) {
 }
 
 async function fetchActualTotalsByGroup(startDate, endDate) {
+  const totals = {};
+  BUDGET_GROUPS.forEach(group => {
+    totals[group] = 0;
+  });
+
   if (!sb) throw new Error("Supabase is not initialized.");
+
+  // If old saved budgets have no valid dates yet, return zeros safely
+  if (!startDate || !endDate) {
+    return totals;
+  }
 
   const { data, error } = await sb
     .from("journal_lines")
@@ -506,19 +587,12 @@ async function fetchActualTotalsByGroup(startDate, endDate) {
 
   if (error) throw error;
 
-  const totals = {};
-  BUDGET_GROUPS.forEach(group => {
-    totals[group] = 0;
-  });
-
   (data || []).forEach(line => {
     const accountName = String(line.account_name || "").trim();
     const group = getDepartmentGroupFromAccountName(accountName);
 
     const debit = Number(line.debit || 0);
     const credit = Number(line.credit || 0);
-
-    // Expense actual = debit - credit
     const actual = debit - credit;
 
     if (!totals[group]) totals[group] = 0;
@@ -530,6 +604,10 @@ async function fetchActualTotalsByGroup(startDate, endDate) {
 
     async function fetchActualBreakdownByGroup(startDate, endDate, groupName) {
   if (!sb) throw new Error("Supabase is not initialized.");
+
+  if (!startDate || !endDate) {
+    return [];
+  }
 
   const { data, error } = await sb
     .from("journal_lines")
@@ -740,7 +818,9 @@ try {
 }
 
   try {
-    const savedBudget = await saveBudgetToSupabase({
+  showLoading("Creating budget...");
+
+  const savedBudget = await saveBudgetToSupabase({
   budgetName,
   budgetYear: Number(budgetYear),
   frequency,
@@ -779,11 +859,13 @@ await loadAllSavedBudgets();
 renderBudgetResults();
 openSavedBudget(savedBudget.id);
 showBudgetSection("results");
-alert("✅ Budget saved successfully!");
+hideLoading();
+showToast("✅ Budget created successfully!");
   } catch (err) {
-    console.error("Budget save error:", err);
-    alert("❌ Failed to save budget: " + (err.message || JSON.stringify(err)));
-  }
+  hideLoading();
+  console.error("Budget save error:", err);
+  alert("❌ Failed to save budget: " + (err.message || JSON.stringify(err)));
+}
 }
 
     async function saveBudgetToSupabase({ budgetName, budgetYear, frequency, startDate, endDate, notes, groupBudgets }) {

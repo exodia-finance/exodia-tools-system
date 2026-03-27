@@ -647,20 +647,37 @@ function renderBudgetChart(budgetData) {
       datasets: [
         {
           label: "Applied",
-          data: appliedData
+          data: appliedData,
+          minBarLength: 8
         },
         {
           label: "Actual",
-          data: actualData
+          data: actualData,
+          minBarLength: 8
         }
       ]
     },
     options: {
       responsive: true,
       maintainAspectRatio: false,
+      interaction: {
+        mode: "nearest",
+        intersect: true
+      },
       plugins: {
         legend: {
           position: "top"
+        },
+        tooltip: {
+          enabled: true,
+          callbacks: {
+            label: function(context) {
+              return `${context.dataset.label}: ${Number(context.raw || 0).toLocaleString("en-US", {
+                minimumFractionDigits: 2,
+                maximumFractionDigits: 2
+              })}`;
+            }
+          }
         }
       },
       scales: {
@@ -691,37 +708,10 @@ function renderBudgetChart(budgetData) {
         .replace(/'/g, "\\'");
     }
 
-    async function initializePage() {
-      try {
-        showLoading("Loading budget...");
-
-        if (!window.supabase || !window.supabase.createClient) {
-          throw new Error("Supabase library not loaded.");
-        }
-
-        sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-        await fetchLiveCOA();
-
-        const params = new URLSearchParams(window.location.search);
-        const budgetId = params.get("id");
-
-        if (!budgetId) {
-          throw new Error("Missing budget id.");
-        }
-
-        await loadBudgetById(budgetId);
-        renderBudgetView();
-        hideLoading();
-      } catch (err) {
-        hideLoading();
-        console.error("Budget view init failed:", err);
-        document.getElementById("budget-view-root").innerHTML = "Failed to load budget.";
-      }
-    }
-
     async function startBudgetViewApp() {
   try {
+    showLoading("Loading budget...");
+
     if (!window.supabase || !window.supabase.createClient) {
       throw new Error("Supabase not loaded");
     }
@@ -736,7 +726,6 @@ function renderBudgetChart(budgetData) {
       return;
     }
 
-    // ✅ logged in → continue
     sb = authClient;
 
     await fetchLiveCOA();
@@ -744,17 +733,21 @@ function renderBudgetChart(budgetData) {
     const params = new URLSearchParams(window.location.search);
     const budgetId = params.get("id");
 
-    if (!budgetId) throw new Error("Missing budget id.");
+    if (!budgetId) {
+      throw new Error("Missing budget id.");
+    }
 
     await loadBudgetById(budgetId);
     renderBudgetView();
+    hideLoading();
 
   } catch (err) {
+    hideLoading();
     console.error("Budget view auth failed:", err);
     window.location.replace("./index.html");
   }
 }
-
+    
 startBudgetViewApp();
   </script>
 </body>

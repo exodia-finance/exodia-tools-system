@@ -6,6 +6,7 @@
   <title>Budget View</title>
   <link rel="stylesheet" href="./css/styles.css" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     .budget-wrap { padding: 12px 20px; }
 
@@ -180,10 +181,17 @@
   </section>
 
   <section class="budget-wrap">
-    <div id="budget-view-root" class="budget-card">
-      Loading budget...
-    </div>
-  </section>
+  <div id="budget-chart-card" class="budget-card">
+    <h2 class="budget-title">Budget Chart</h2>
+    <canvas id="budget-bar-chart" height="120"></canvas>
+  </div>
+</section>
+
+<section class="budget-wrap">
+  <div id="budget-view-root" class="budget-card">
+    Loading budget...
+  </div>
+</section>
 
   <div id="details-panel" class="details-panel" onclick="closeDetailsPanel(event)">
     <div class="details-card" onclick="event.stopPropagation()">
@@ -338,10 +346,12 @@
     }
 
     function getLineStatus(startDate, endDate, remaining) {
-      const base = getOverallBudgetStatus(startDate, endDate);
-      if (Number(remaining || 0) < 0) return "Over Budget";
-      return base === "Active" ? "Within Budget" : base;
-    }
+  const value = Number(remaining || 0);
+
+  if (value < 0) return "Over Budget";
+  if (value === 0) return "Exact Budget";
+  return "Under Budget";
+}
 
     async function fetchActualTotalsByGroup(startDate, endDate) {
       const totals = {};
@@ -501,11 +511,18 @@
         }
 
         body.innerHTML = rows.map(row => `
-          <tr>
-            <td>${escapeHtml(row.expenseName)}</td>
-            <td style="text-align:right;">${formatMoney(row.amount)}</td>
-          </tr>
-        `).join("");
+  <tr>
+    <td>
+      <a
+        href="./index.html?view=ledger&account=${encodeURIComponent(row.expenseName)}&from=${encodeURIComponent(startDate)}&to=${encodeURIComponent(endDate)}"
+        style="text-decoration:underline; color:inherit;"
+      >
+        ${escapeHtml(row.expenseName)}
+      </a>
+    </td>
+    <td style="text-align:right;">${formatMoney(row.amount)}</td>
+  </tr>
+`).join("");
       } catch (err) {
         console.error("Failed to load detail breakdown:", err);
         body.innerHTML = `<tr><td colspan="2">Failed to load detail breakdown.</td></tr>`;
@@ -585,8 +602,47 @@
           </table>
         </div>
       `;
+
+      renderBudgetChart(r);
     }
 
+    
+    let budgetChartInstance = null;
+
+function renderBudgetChart(budgetData) {
+  const canvas = document.getElementById("budget-bar-chart");
+  if (!canvas || !budgetData) return;
+
+  const labels = budgetData.groupBudgets.map(item => item.group);
+  const appliedData = budgetData.groupBudgets.map(item => Number(item.amount || 0));
+  const actualData = budgetData.groupBudgets.map(item => Number(item.actual || 0));
+
+  if (budgetChartInstance) {
+    budgetChartInstance.destroy();
+  }
+
+  budgetChartInstance = new Chart(canvas, {
+    type: "bar",
+    data: {
+      labels,
+      datasets: [
+        {
+          label: "Applied",
+          data: appliedData
+        },
+        {
+          label: "Actual",
+          data: actualData
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false
+    }
+  });
+}
+    
     function escapeHtml(value) {
       return String(value ?? "")
         .replace(/&/g, "&amp;")

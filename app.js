@@ -261,6 +261,10 @@ window.signIn = async function signIn() {
 };
 
 window.signOut = async function signOut() {
+  stopActivityTracking();
+  hideVerifyModal();
+  clearSessionTimers();
+
   await sb.auth.signOut();
 
   clearAuthInputs();

@@ -440,8 +440,6 @@ await initAppAfterLogin();
 };
 
 window.signOut = async function signOut() {
-
-window.signOut = async function signOut() {
   stopActivityTracking();
   hideVerifyModal();
   clearSessionTimers();

@@ -1160,14 +1160,38 @@ async function loadAllSavedBudgets() {
     document.getElementById("budget-start-date").value = formatDateForInput(new Date());
 autoSetEndDate();
 
-initializeBudgetPage().then(async () => {
+async function startBudgetApp() {
   try {
+    if (!window.supabase || !window.supabase.createClient) {
+      throw new Error("Supabase not loaded");
+    }
+
+    const authClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    const { data } = await authClient.auth.getSession();
+    const session = data?.session;
+
+    if (!session?.user) {
+      window.location.replace("./index.html");
+      return;
+    }
+
+    // ✅ user is logged in → continue normal app
+    sb = authClient;
+
+    await fetchLiveCOA();
+    renderDepartmentBudgetRows();
+
     await loadAllSavedBudgets();
     renderBudgetResults();
+
   } catch (err) {
-    console.error("Failed to load saved budget history:", err);
+    console.error("Budget page auth failed:", err);
+    window.location.replace("./index.html");
   }
-});
+}
+
+startBudgetApp();
   </script>
 
 </body>
